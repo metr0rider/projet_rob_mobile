@@ -1,0 +1,8 @@
+prefix=/home/catkin_ws/install
+
+Name: convert_img
+Description: Description of convert_img
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
