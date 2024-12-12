@@ -134,6 +134,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/pck_launch_all_node.cpp)
+add_executable(rand_exp src/rand_exp.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -150,6 +151,10 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
+target_link_libraries(rand_exp
+  ${catkin_LIBRARIES}
+)
+
 #############
 ## Install ##
 #############
@@ -163,6 +168,11 @@ include_directories(
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
+catkin_install_python(PROGRAMS
+  src/mark_robot_on_map.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html

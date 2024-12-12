@@ -4,12 +4,19 @@ import rospy
 import cv2
 import numpy as np
 import os
+from std_msgs.msg import Int32MultiArray, MultiArrayDimension
 
 
 class ImageConverter:
     def __init__(self):
         # Initialisation de ROS
         rospy.init_node('im_conv', anonymous=True)
+        
+        # Publisher pour le tableau binaire
+        self.map_publisher = rospy.Publisher('binary_map_topic', Int32MultiArray, queue_size=10)
+        
+        # Publisher pour la position du robot (initiale et 
+        # /pos_robot
 
         # Paramètres du noeud
         self.map_file = rospy.get_param('~map_file', '/home/projet_rob_mobile/map.pgm')  # Fichier .pgm
@@ -53,23 +60,47 @@ class ImageConverter:
                 interpolation=cv2.INTER_NEAREST
             )
 
-            # Appliquer une binarisation adaptative
-            binarized_image = cv2.adaptiveThreshold(
-                scaled_image,
-                255,
-                cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                cv2.THRESH_BINARY_INV,
-                11,  # Taille du voisinage pour calculer le seuil
-                2    # Constante soustraite
-            )
+            # Appliquer le traitement des pixels noirs
+            processed_image = self.expand_black_pixels(scaled_image)
 
             # Générer une grille adaptée aux obstacles
-            grid_image = self.add_obstacle_grid(binarized_image)
-
+            no_grid_image, grid_image = self.add_obstacle_grid(processed_image)
+            
+            # Sauvegarder l'image sans la grille
+            no_grid_output_file = os.path.join(self.output_dir, 'map_without_grid.png')
+            cv2.imwrite(no_grid_output_file, no_grid_image)
+            rospy.loginfo(f"Image without grid saved to {no_grid_output_file}")
+            
             # Sauvegarder l'image avec la grille
             output_file = os.path.join(self.output_dir, 'map_with_obstacle_grid.png')
             cv2.imwrite(output_file, grid_image)
             rospy.loginfo(f"Image processed and saved to {output_file}")
+            
+            # Générer un tableau binaire à partir de l'image traitée
+            # Pixels blancs (obstacles) -> 1, Pixels rouges (zones libres) -> 0
+            grid_image_gray = cv2.cvtColor(no_grid_image, cv2.COLOR_BGR2GRAY)
+            binary_map = np.where(grid_image_gray == 255, 1, 0)
+            rows, cols = binary_map.shape
+            print(f"Number of rows: {rows}, Number of columns: {cols}")
+            
+            # Publier le tableau binaire
+            self.publish_binary_map(binary_map)
+            
+            # Convertir le tableau NumPy en tableau Python
+            binary_map_python = binary_map.tolist()
+            
+            # Afficher une partie du tableau pour vérification
+            #print(binary_map_python)  # Affiche les 5 premières lignes
+
+            # Sauvegarder le tableau binaire dans un fichier texte
+            binary_output_file = os.path.join(self.output_dir, 'obstacle_map.txt')
+            np.savetxt(binary_output_file, binary_map, fmt='%d', delimiter='')
+            rospy.loginfo(f"Obstacle map saved to {binary_output_file}")
+
+            
+            #obstacle_map = np.load('/home/projet_rob_mobile/obstacle_map.txt')
+            #print(obstacle_map)
+            
 
         except Exception as e:
             rospy.logerr(f"Failed to process map: {e}")
@@ -95,11 +126,33 @@ class ImageConverter:
         cropped_image = image[min_row:max_row + 1, min_col:max_col + 1]
         return cropped_image
 
+    def expand_black_pixels(self, image):
+        """
+        Étend les pixels noirs en fonction de leurs voisins pour combler les espaces proches.
+        """
+        # Réduction du bruit
+        denoised_image = cv2.medianBlur(image, 3)
+
+        # Identification des pixels noirs
+        _, binary_image = cv2.threshold(denoised_image, 50, 255, cv2.THRESH_BINARY_INV)
+
+        # Dilatation des pixels noirs
+        dilation_size = 15 # 20
+        kernel = cv2.getStructuringElement(
+            cv2.MORPH_RECT,
+            (2 * dilation_size + 1, 2 * dilation_size + 1),
+            (dilation_size, dilation_size)
+        )
+        dilated_image = cv2.dilate(binary_image, kernel)
+
+        return dilated_image
+
     def add_obstacle_grid(self, image):
         """
         Ajoute une grille qui s'adapte aux obstacles en les englobant dans des cellules inatteignables.
         """
         grid_image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)  # Convertir en couleur pour dessiner les grilles
+        no_grid_image = grid_image.copy()
         step = self.grid_step
 
         # Définir un seuil pour considérer une cellule comme un obstacle
@@ -134,7 +187,26 @@ class ImageConverter:
                 )
 
         rospy.loginfo(f"Number of obstacle cells: {obstacle_cells}")
-        return grid_image
+        return no_grid_image, grid_image
+        
+    def publish_binary_map(self, binary_map):
+	    """
+	    Publie le tableau binaire (converti en tableau Python) sur un topic ROS.
+	    """
+	    msg = Int32MultiArray()
+
+	    # Ajouter les dimensions
+	    rows, cols = binary_map.shape
+	    msg.layout.dim.append(MultiArrayDimension(label="rows", size=rows, stride=rows * cols))
+	    msg.layout.dim.append(MultiArrayDimension(label="cols", size=cols, stride=cols))
+
+	    # Msg.data
+	    msg.data = binary_map.tolist()
+
+	    # Publier le message
+	    self.map_publisher.publish(msg)
+	    rospy.loginfo(f"Published binary map of size {rows}x{cols} on 'binary_map_topic'")
+
 
 
 if __name__ == '__main__':

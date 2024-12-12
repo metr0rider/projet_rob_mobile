@@ -3,9 +3,9 @@
     
     <!-- Lancer le script de traitement -->
     <node pkg="convert_img" type="im_conv.py" name="im_conv" output="screen">
-    	<param name="dilation_size" value="7" />
-    	<param name="scale_factor" value="2" />
-        <param name="binarize_threshold" value="50" />
+    	<!--param name="dilation_size" value="7" /-->
+    	<param name="scale_factor" value="2" /> <!-- 10 -->
+        <param name="binarize_threshold" value="20" />
         <!--param name="grid_step" value="10" /-->
     </node>
 </launch>
