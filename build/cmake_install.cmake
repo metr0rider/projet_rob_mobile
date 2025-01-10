@@ -135,6 +135,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/catkin_ws/build/minilab_simulation/cmake_install.cmake")
   include("/home/catkin_ws/build/convert_img/cmake_install.cmake")
   include("/home/catkin_ws/build/path_find/cmake_install.cmake")
+  include("/home/catkin_ws/build/path_following/cmake_install.cmake")
   include("/home/catkin_ws/build/pck_launch_all/cmake_install.cmake")
   include("/home/catkin_ws/build/joycommand/cmake_install.cmake")
 

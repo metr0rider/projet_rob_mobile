@@ -52,3 +52,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/pck_launch_all" TYPE FILE FILES "/home/catkin_ws/src/pck_launch_all/package.xml")
 endif()
 
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pck_launch_all" TYPE PROGRAM FILES "/home/catkin_ws/build/pck_launch_all/catkin_generated/installspace/mark_robot_on_map.py")
+endif()
+
