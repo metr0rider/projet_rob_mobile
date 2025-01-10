@@ -4,9 +4,21 @@ import rospy
 import numpy as np
 import time
 import tf
+from geometry_msgs.msg import PointStamped
 #from nav_msgs import GetMap
 from std_msgs.msg import Int32MultiArray
 from tf2_msgs.msg import TFMessage
+
+rospy.init_node('dijkstra')
+point = PointStamped()
+trans=[0,0,0]
+rot=[0,0,0,0]
+listener = tf.TransformListener()
+point_de_passage_leger=[]
+timetopublish=0;
+position_initial=[0.0,0.0]
+position_finale=[0.0,0.0]
+
 #cette fonction permet de donner la distance minimale d'un point en le comparant à un autre
 def newval(table,pos,prevdist,table_access):
 	#on vérifie tout d'abord si le point est hors de la map
@@ -89,75 +101,6 @@ def path_find(table,pos):
 	path=[pos]
 	D=table[pos[0]][pos[1]]
 	while (table[pos[0]][pos[1]]!=0):
-		'''
-		if pos[0]<0:
-			if pos[1]<0:
-				for k in range(pos[0],pos[0]+1):
-					for i in range(pos[1],pos[1]+1):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			if (pos[1]>len(table[0])):
-				for k in range(pos[0],pos[0]+1):
-					for i in range(pos[1]-1,pos[1]):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			else:
-				for k in range(pos[0],pos[0]+1):
-					for i in range(pos[1]-1,pos[1]+1):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-		if pos[0]>len(table):
-			if pos[1]<0:
-				for k in range(pos[0]-1,pos[0]):
-					for i in range(pos[1],pos[1]+1):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			if (pos[1]>len(table[0])):
-				for k in range(pos[0]-1,pos[0]):
-					for i in range(pos[1]-1,pos[1]):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			else:
-				for k in range(pos[0]-1,pos[0]):
-					for i in range(pos[1]-1,pos[1]+1):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-		else:
-			if pos[1]<0:
-				for k in range(pos[0]-1,pos[0]+1):
-					for i in range(pos[1],pos[1]+1):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			if (pos[1]>len(table[0])):
-				for k in range(pos[0]-1,pos[0]+1):
-					for i in range(pos[1]-1,pos[1]):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			else:'''
 		#on cherche le point le plus proche de la position actuel du robot, en partant de l'objectif
 		#on cherche à chaque tour de boucle le point le plus proche et on le définie comme un point de passage du robot
 		#la boucle suivante s'executera sur le point de passage nouvellement définie
@@ -222,29 +165,36 @@ def pos_callback(pos):
 '''	
 
 def dijk_callback(table):
-	
 	table=dijkstra_algorithm(table_access, position_finale)
 	point_de_passage=path_find(table,position_initial)
 	point_de_passage_leger=point_list_cleaner(path)
-	pub.publish(point_de_passage_leger)
+	if (timetopublish==1):
+		pub.publish(point_de_passage_leger)
+		timetopublish=0
+	
+def pos_callback(pos):
+	point.header.stamp = rospy.get_time
+	point.header.frame_id = "/map"
+	point.point.x = pos.point.x 
+	point.point.y = pos.point.y 
+	point.point.z = pos.point.z
+	rospy.loginfo("coordinates:x=%f y=%f" %(point.point.x,point.point.y))
+	position_finale=[point.point.x,point.point.y]
+	(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
+	print(trans)
+	print(rot)
+	position_initial=[trans[0],trans[1]]
+	timetopublish=1
 
 def main():
 
 	# Crée un node qui va récupérer les positions et la map donné par le robot.
-	rospy.init_node('dijkstra')
 	listener = tf.TransformListener()
 	#print("test")
 	#sub = rospy.Subscriber('/tf', TFMessage , pos_callback, queue_size=10)
-	while 1:
-		try:
-			(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
-			print(trans)
-			print(rot)
-			time.sleep(5)
-		except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-			continue
 	#print("sub")
 	sub1 = rospy.Subscriber('/binary_map_topic', Int32MultiArray , dijk_callback, queue_size=10)
+	sub2 = rospy.Subscriber('/clicked_point', PointStamped , pos_callback)
 	#print("sub1")
 	# spin le node afin de recevoir les messages, et de publier la liste de point de passage.
 	rospy.spin()
