@@ -130,6 +130,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
+<<<<<<< HEAD
   include("/home/projet_rob_mobile/build/gtest/cmake_install.cmake")
   include("/home/projet_rob_mobile/build/minilab_model/cmake_install.cmake")
   include("/home/projet_rob_mobile/build/minilab_simulation/cmake_install.cmake")
@@ -137,6 +138,16 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/projet_rob_mobile/build/path_find/cmake_install.cmake")
   include("/home/projet_rob_mobile/build/pck_launch_all/cmake_install.cmake")
   include("/home/projet_rob_mobile/build/joycommand/cmake_install.cmake")
+=======
+  include("/home/catkin_ws/build/gtest/cmake_install.cmake")
+  include("/home/catkin_ws/build/minilab_model/cmake_install.cmake")
+  include("/home/catkin_ws/build/minilab_simulation/cmake_install.cmake")
+  include("/home/catkin_ws/build/convert_img/cmake_install.cmake")
+  include("/home/catkin_ws/build/path_find/cmake_install.cmake")
+  include("/home/catkin_ws/build/path_following/cmake_install.cmake")
+  include("/home/catkin_ws/build/pck_launch_all/cmake_install.cmake")
+  include("/home/catkin_ws/build/joycommand/cmake_install.cmake")
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
 
 endif()
 

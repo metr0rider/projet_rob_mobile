@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
 import rospy
+<<<<<<< HEAD
 import tf2_ros
+=======
+import tf
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
 import cv2
 import yaml
 import numpy as np
@@ -38,6 +42,7 @@ def get_robot_position():
     # Initialisation de ROS
     rospy.init_node('robot_position_marker', anonymous=True)
 
+<<<<<<< HEAD
     # Création du buffer et du listener TF2
     tf_buffer = tf2_ros.Buffer()
     listener = tf2_ros.TransformListener(tf_buffer)
@@ -51,6 +56,16 @@ def get_robot_position():
         robot_position = trans.transform.translation
         return (robot_position.x, robot_position.y, robot_position.z)
     except (tf2_ros.LookupException, tf2_ros.ExtrapolationException) as e:
+=======
+    # Attente des données de TF
+    listener = tf.TransformListener()
+    listener.waitForTransform("/map", "/base_link", rospy.Time(0), rospy.Duration(10.0))
+
+    try:
+        (trans, rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
+        return trans  # Retourne les coordonnées x, y, z
+    except tf.Exception as e:
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
         rospy.logerr(f"Impossible de récupérer la position du robot : {e}")
         return None
 
@@ -59,9 +74,14 @@ if __name__ == '__main__':
     map_yaml_path = "/home/projet_rob_mobile/map.yaml"
     output_image_path = "/home/projet_rob_mobile/map_with_robot.pgm"
 
+<<<<<<< HEAD
     # Obtenir la position du robot
     robot_position = get_robot_position()
     if robot_position:
         # Dessiner la position du robot sur la carte
+=======
+    robot_position = get_robot_position()
+    if robot_position:
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
         draw_robot_on_map(map_image_path, map_yaml_path, robot_position, output_image_path)
 

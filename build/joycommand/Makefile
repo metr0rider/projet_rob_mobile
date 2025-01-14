@@ -68,16 +68,6 @@ install/strip/fast: preinstall/fast
 	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
 .PHONY : install/strip/fast
 
-# Special rule for the target list_install_components
-list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
-.PHONY : list_install_components
-
-# Special rule for the target list_install_components
-list_install_components/fast: list_install_components
-
-.PHONY : list_install_components/fast
-
 # Special rule for the target install/local
 install/local: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
@@ -102,16 +92,26 @@ install/fast: preinstall/fast
 	/usr/bin/cmake -P cmake_install.cmake
 .PHONY : install/fast
 
-# Special rule for the target test
-test:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/usr/bin/ctest --force-new-ctest-process $(ARGS)
-.PHONY : test
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
 
-# Special rule for the target test
-test/fast: test
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
 
-.PHONY : test/fast
+.PHONY : list_install_components/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -124,16 +124,16 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
 
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
+# Special rule for the target test
+test/fast: test
 
-.PHONY : rebuild_cache/fast
+.PHONY : test/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -168,16 +168,23 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+<<<<<<< HEAD
 joycommand/CMakeFiles/geometry_msgs_generate_messages_eus.dir/rule:
 	cd /home/projet_rob_mobile/build && $(MAKE) -f CMakeFiles/Makefile2 joycommand/CMakeFiles/geometry_msgs_generate_messages_eus.dir/rule
 .PHONY : joycommand/CMakeFiles/geometry_msgs_generate_messages_eus.dir/rule
+=======
+joycommand/CMakeFiles/sensor_msgs_generate_messages_py.dir/rule:
+	cd /home/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 joycommand/CMakeFiles/sensor_msgs_generate_messages_py.dir/rule
+.PHONY : joycommand/CMakeFiles/sensor_msgs_generate_messages_py.dir/rule
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
 
 # Convenience name for target.
-geometry_msgs_generate_messages_eus: joycommand/CMakeFiles/geometry_msgs_generate_messages_eus.dir/rule
+sensor_msgs_generate_messages_py: joycommand/CMakeFiles/sensor_msgs_generate_messages_py.dir/rule
 
-.PHONY : geometry_msgs_generate_messages_eus
+.PHONY : sensor_msgs_generate_messages_py
 
 # fast build rule for target.
+<<<<<<< HEAD
 geometry_msgs_generate_messages_eus/fast:
 	cd /home/projet_rob_mobile/build && $(MAKE) -f joycommand/CMakeFiles/geometry_msgs_generate_messages_eus.dir/build.make joycommand/CMakeFiles/geometry_msgs_generate_messages_eus.dir/build
 .PHONY : geometry_msgs_generate_messages_eus/fast
@@ -226,6 +233,11 @@ geometry_msgs_generate_messages_py: joycommand/CMakeFiles/geometry_msgs_generate
 geometry_msgs_generate_messages_py/fast:
 	cd /home/projet_rob_mobile/build && $(MAKE) -f joycommand/CMakeFiles/geometry_msgs_generate_messages_py.dir/build.make joycommand/CMakeFiles/geometry_msgs_generate_messages_py.dir/build
 .PHONY : geometry_msgs_generate_messages_py/fast
+=======
+sensor_msgs_generate_messages_py/fast:
+	cd /home/catkin_ws/build && $(MAKE) -f joycommand/CMakeFiles/sensor_msgs_generate_messages_py.dir/build.make joycommand/CMakeFiles/sensor_msgs_generate_messages_py.dir/build
+.PHONY : sensor_msgs_generate_messages_py/fast
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
 
 # Convenience name for target.
 joycommand/CMakeFiles/sensor_msgs_generate_messages_nodejs.dir/rule:
@@ -243,16 +255,23 @@ sensor_msgs_generate_messages_nodejs/fast:
 .PHONY : sensor_msgs_generate_messages_nodejs/fast
 
 # Convenience name for target.
+<<<<<<< HEAD
 joycommand/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/rule:
 	cd /home/projet_rob_mobile/build && $(MAKE) -f CMakeFiles/Makefile2 joycommand/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/rule
 .PHONY : joycommand/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/rule
+=======
+joycommand/CMakeFiles/sensor_msgs_generate_messages_lisp.dir/rule:
+	cd /home/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 joycommand/CMakeFiles/sensor_msgs_generate_messages_lisp.dir/rule
+.PHONY : joycommand/CMakeFiles/sensor_msgs_generate_messages_lisp.dir/rule
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
 
 # Convenience name for target.
-geometry_msgs_generate_messages_cpp: joycommand/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/rule
+sensor_msgs_generate_messages_lisp: joycommand/CMakeFiles/sensor_msgs_generate_messages_lisp.dir/rule
 
-.PHONY : geometry_msgs_generate_messages_cpp
+.PHONY : sensor_msgs_generate_messages_lisp
 
 # fast build rule for target.
+<<<<<<< HEAD
 geometry_msgs_generate_messages_cpp/fast:
 	cd /home/projet_rob_mobile/build && $(MAKE) -f joycommand/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/build.make joycommand/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/build
 .PHONY : geometry_msgs_generate_messages_cpp/fast
@@ -301,6 +320,11 @@ sensor_msgs_generate_messages_cpp: joycommand/CMakeFiles/sensor_msgs_generate_me
 sensor_msgs_generate_messages_cpp/fast:
 	cd /home/projet_rob_mobile/build && $(MAKE) -f joycommand/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/build.make joycommand/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/build
 .PHONY : sensor_msgs_generate_messages_cpp/fast
+=======
+sensor_msgs_generate_messages_lisp/fast:
+	cd /home/catkin_ws/build && $(MAKE) -f joycommand/CMakeFiles/sensor_msgs_generate_messages_lisp.dir/build.make joycommand/CMakeFiles/sensor_msgs_generate_messages_lisp.dir/build
+.PHONY : sensor_msgs_generate_messages_lisp/fast
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
 
 # Convenience name for target.
 joycommand/CMakeFiles/sensor_msgs_generate_messages_eus.dir/rule:
@@ -317,6 +341,21 @@ sensor_msgs_generate_messages_eus/fast:
 	cd /home/projet_rob_mobile/build && $(MAKE) -f joycommand/CMakeFiles/sensor_msgs_generate_messages_eus.dir/build.make joycommand/CMakeFiles/sensor_msgs_generate_messages_eus.dir/build
 .PHONY : sensor_msgs_generate_messages_eus/fast
 
+# Convenience name for target.
+joycommand/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/rule:
+	cd /home/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 joycommand/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/rule
+.PHONY : joycommand/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/rule
+
+# Convenience name for target.
+sensor_msgs_generate_messages_cpp: joycommand/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/rule
+
+.PHONY : sensor_msgs_generate_messages_cpp
+
+# fast build rule for target.
+sensor_msgs_generate_messages_cpp/fast:
+	cd /home/catkin_ws/build && $(MAKE) -f joycommand/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/build.make joycommand/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/build
+.PHONY : sensor_msgs_generate_messages_cpp/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -324,22 +363,17 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... install/strip"
-	@echo "... list_install_components"
 	@echo "... install/local"
-	@echo "... geometry_msgs_generate_messages_eus"
 	@echo "... install"
-	@echo "... geometry_msgs_generate_messages_lisp"
-	@echo "... sensor_msgs_generate_messages_lisp"
-	@echo "... geometry_msgs_generate_messages_py"
-	@echo "... sensor_msgs_generate_messages_nodejs"
-	@echo "... geometry_msgs_generate_messages_cpp"
-	@echo "... sensor_msgs_generate_messages_py"
-	@echo "... geometry_msgs_generate_messages_nodejs"
-	@echo "... sensor_msgs_generate_messages_cpp"
-	@echo "... sensor_msgs_generate_messages_eus"
-	@echo "... test"
-	@echo "... edit_cache"
+	@echo "... list_install_components"
 	@echo "... rebuild_cache"
+	@echo "... edit_cache"
+	@echo "... test"
+	@echo "... sensor_msgs_generate_messages_py"
+	@echo "... sensor_msgs_generate_messages_nodejs"
+	@echo "... sensor_msgs_generate_messages_lisp"
+	@echo "... sensor_msgs_generate_messages_eus"
+	@echo "... sensor_msgs_generate_messages_cpp"
 .PHONY : help
 
 

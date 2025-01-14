@@ -169,7 +169,11 @@ depend:
 
 # Convenience name for target.
 pck_launch_all/CMakeFiles/rand_exp.dir/rule:
+<<<<<<< HEAD
 	cd /home/projet_rob_mobile/build && $(MAKE) -f CMakeFiles/Makefile2 pck_launch_all/CMakeFiles/rand_exp.dir/rule
+=======
+	cd /home/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 pck_launch_all/CMakeFiles/rand_exp.dir/rule
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
 .PHONY : pck_launch_all/CMakeFiles/rand_exp.dir/rule
 
 # Convenience name for target.
@@ -179,7 +183,11 @@ rand_exp: pck_launch_all/CMakeFiles/rand_exp.dir/rule
 
 # fast build rule for target.
 rand_exp/fast:
+<<<<<<< HEAD
 	cd /home/projet_rob_mobile/build && $(MAKE) -f pck_launch_all/CMakeFiles/rand_exp.dir/build.make pck_launch_all/CMakeFiles/rand_exp.dir/build
+=======
+	cd /home/catkin_ws/build && $(MAKE) -f pck_launch_all/CMakeFiles/rand_exp.dir/build.make pck_launch_all/CMakeFiles/rand_exp.dir/build
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
 .PHONY : rand_exp/fast
 
 src/rand_exp.o: src/rand_exp.cpp.o
@@ -188,7 +196,11 @@ src/rand_exp.o: src/rand_exp.cpp.o
 
 # target to build an object file
 src/rand_exp.cpp.o:
+<<<<<<< HEAD
 	cd /home/projet_rob_mobile/build && $(MAKE) -f pck_launch_all/CMakeFiles/rand_exp.dir/build.make pck_launch_all/CMakeFiles/rand_exp.dir/src/rand_exp.cpp.o
+=======
+	cd /home/catkin_ws/build && $(MAKE) -f pck_launch_all/CMakeFiles/rand_exp.dir/build.make pck_launch_all/CMakeFiles/rand_exp.dir/src/rand_exp.cpp.o
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
 .PHONY : src/rand_exp.cpp.o
 
 src/rand_exp.i: src/rand_exp.cpp.i
@@ -197,7 +209,11 @@ src/rand_exp.i: src/rand_exp.cpp.i
 
 # target to preprocess a source file
 src/rand_exp.cpp.i:
+<<<<<<< HEAD
 	cd /home/projet_rob_mobile/build && $(MAKE) -f pck_launch_all/CMakeFiles/rand_exp.dir/build.make pck_launch_all/CMakeFiles/rand_exp.dir/src/rand_exp.cpp.i
+=======
+	cd /home/catkin_ws/build && $(MAKE) -f pck_launch_all/CMakeFiles/rand_exp.dir/build.make pck_launch_all/CMakeFiles/rand_exp.dir/src/rand_exp.cpp.i
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
 .PHONY : src/rand_exp.cpp.i
 
 src/rand_exp.s: src/rand_exp.cpp.s
@@ -206,7 +222,11 @@ src/rand_exp.s: src/rand_exp.cpp.s
 
 # target to generate assembly for a file
 src/rand_exp.cpp.s:
+<<<<<<< HEAD
 	cd /home/projet_rob_mobile/build && $(MAKE) -f pck_launch_all/CMakeFiles/rand_exp.dir/build.make pck_launch_all/CMakeFiles/rand_exp.dir/src/rand_exp.cpp.s
+=======
+	cd /home/catkin_ws/build && $(MAKE) -f pck_launch_all/CMakeFiles/rand_exp.dir/build.make pck_launch_all/CMakeFiles/rand_exp.dir/src/rand_exp.cpp.s
+>>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
 .PHONY : src/rand_exp.cpp.s
 
 # Help Target

@@ -2,8 +2,23 @@
 
 import rospy
 import numpy as np
-
+import time
+import tf
+from geometry_msgs.msg import PointStamped
+#from nav_msgs import GetMap
 from std_msgs.msg import Int32MultiArray
+from tf2_msgs.msg import TFMessage
+
+rospy.init_node('dijkstra')
+point = PointStamped()
+trans=[0,0,0]
+rot=[0,0,0,0]
+listener = tf.TransformListener()
+point_de_passage_leger=[]
+timetopublish=0;
+position_initial=[0.0,0.0]
+position_finale=[0.0,0.0]
+
 #cette fonction permet de donner la distance minimale d'un point en le comparant à un autre
 def newval(table,pos,prevdist,table_access):
 	#on vérifie tout d'abord si le point est hors de la map
@@ -86,82 +101,13 @@ def path_find(table,pos):
 	path=[pos]
 	D=table[pos[0]][pos[1]]
 	while (table[pos[0]][pos[1]]!=0):
-		'''
-		if pos[0]<0:
-			if pos[1]<0:
-				for k in range(pos[0],pos[0]+1):
-					for i in range(pos[1],pos[1]+1):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			if (pos[1]>len(table[0])):
-				for k in range(pos[0],pos[0]+1):
-					for i in range(pos[1]-1,pos[1]):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			else:
-				for k in range(pos[0],pos[0]+1):
-					for i in range(pos[1]-1,pos[1]+1):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-		if pos[0]>len(table):
-			if pos[1]<0:
-				for k in range(pos[0]-1,pos[0]):
-					for i in range(pos[1],pos[1]+1):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			if (pos[1]>len(table[0])):
-				for k in range(pos[0]-1,pos[0]):
-					for i in range(pos[1]-1,pos[1]):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			else:
-				for k in range(pos[0]-1,pos[0]):
-					for i in range(pos[1]-1,pos[1]+1):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-		else:
-			if pos[1]<0:
-				for k in range(pos[0]-1,pos[0]+1):
-					for i in range(pos[1],pos[1]+1):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			if (pos[1]>len(table[0])):
-				for k in range(pos[0]-1,pos[0]+1):
-					for i in range(pos[1]-1,pos[1]):
-						if table[k][i]<D:
-							D=table[k][i]
-							val=[k,i]
-				path.append([val[0],val[1]])
-				pos=val
-			else:'''
 		#on cherche le point le plus proche de la position actuel du robot, en partant de l'objectif
 		#on cherche à chaque tour de boucle le point le plus proche et on le définie comme un point de passage du robot
 		#la boucle suivante s'executera sur le point de passage nouvellement définie
 		#d'abord sur les lignes
-		for k in range(pos[0]-1,pos[0]+1):
+		for k in range(pos[0]-1,pos[0]+2):
 			#puis sur les colonnes
-			for i in range(pos[1]-1,pos[1]+1):
+			for i in range(pos[1]-1,pos[1]+2):
 				#on vérifie si ca distance est inférieur à la plus petite déjà identifié
 				if table[k][i]<D:
 					#si oui, on met a jour la distance, et on sauvegarde le point
@@ -174,49 +120,88 @@ def path_find(table,pos):
 	#à la fin on inverse le sens de la liste afin d'avoir la liste des points de passage dans le bon sens
 	path.reverse()
 	return(path)
-											
-			
-'''
 
+def point_list_cleaner(list_point):
+	k=0
+	#on parcourt tout les points de la liste
+	while (k<(len(list_point)-2)):
+		i=1
+		#on r"cupère la direction actuelle à prendre
+		comp=[b - a for a, b in zip(list_point[k+1], list_point[k])]
+		#tant que les points suivant suivent cette direction, on indente i
+		while ((comp==[b - a for a, b in zip(list_point[k+i+1], list_point[k+i])]) and (k+i<len(list_point)-2)):
+			i+=1
+		#si il y a plus d'un point dans la même direction, on les supprime
+		if (i>1):
+			b=1
+			for v in range(1,i):
+				if (v%10!=0):
+					list_point.pop(k+b)
+				else:
+					b+=1
+		k+=1
+	return(list_point)
+					
+
+'''
 def main():
 	table_access=[[1,1,1,1,1,1,1,1],[1,0,0,0,0,0,1,1],[1,0,0,0,0,1,1,1],[1,1,0,0,1,1,0,1],[1,1,0,0,0,0,0,1],[1,1,0,0,0,0,0,1],[1,1,1,1,0,1,0,1],[1,1,1,1,1,1,1,1]]
-	table=dijkstra_algorithm(table_access, [1,2])
+	table=dijkstra_algorithm(table_access, [6,6])
 	print(table)
-	path=path_find(table,[5,5])
+	path=path_find(table,[1,2])
 	print(path)
+	clean_path=point_list_cleaner(path)
+	print(clean_path)
 '''
-position_initial=[0,0]
-position_finale=[0,0]
 pub = rospy.Publisher('/path_follow', Int32MultiArray , queue_size=10)
-count=0
+
+
+'''
 def pos_callback(pos):
-	if count==0:
-		position_initial=pos
-	else
-		position_finale=pos
-	count++
-	
+	position=pos.transforms
+	time.sleep(5)
+	posx=position[0].transform.translation.x
+	print(posx)
+'''	
 
 def dijk_callback(table):
-	
 	table=dijkstra_algorithm(table_access, position_finale)
 	point_de_passage=path_find(table,position_initial)
+	point_de_passage_leger=point_list_cleaner(path)
+	if (timetopublish==1):
+		pub.publish(point_de_passage_leger)
+		timetopublish=0
 	
-	pub.publish(point_de_passage)
+def pos_callback(pos):
+	point.header.stamp = rospy.get_time
+	point.header.frame_id = "/map"
+	point.point.x = pos.point.x 
+	point.point.y = pos.point.y 
+	point.point.z = pos.point.z
+	rospy.loginfo("coordinates:x=%f y=%f" %(point.point.x,point.point.y))
+	position_finale=[point.point.x,point.point.y]
+	(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
+	print(trans)
+	print(rot)
+	position_initial=[trans[0],trans[1]]
+	timetopublish=1
 
 def main():
 
 	# Crée un node qui va récupérer les positions et la map donné par le robot.
-	rospy.init_node('dijkstra')
-	sub = rospy.Subscriber('/pos_robot', Int32MultiArray , pos_callback, queue_size=10)
+	listener = tf.TransformListener()
+	#print("test")
+	#sub = rospy.Subscriber('/tf', TFMessage , pos_callback, queue_size=10)
+	#print("sub")
 	sub1 = rospy.Subscriber('/binary_map_topic', Int32MultiArray , dijk_callback, queue_size=10)
-
+	sub2 = rospy.Subscriber('/clicked_point', PointStamped , pos_callback)
+	#print("sub1")
 	# spin le node afin de recevoir les messages, et de publier la liste de point de passage.
 	rospy.spin()
 
 	# nettoie l'environnement avant de s'arréter.
 	rospy.destroy_node()
 	rospy.shutdown()
-	
+
 if __name__ == "__main__":
 	main()
