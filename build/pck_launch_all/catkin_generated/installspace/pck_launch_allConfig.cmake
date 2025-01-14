@@ -67,14 +67,14 @@ set(pck_launch_all_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(pck_launch_all_SOURCE_PREFIX /home/catkin_ws/src/pck_launch_all)
-  set(pck_launch_all_DEVEL_PREFIX /home/catkin_ws/devel)
+  set(pck_launch_all_SOURCE_PREFIX /home/projet_rob_mobile/src/pck_launch_all)
+  set(pck_launch_all_DEVEL_PREFIX /home/projet_rob_mobile/devel)
   set(pck_launch_all_INSTALL_PREFIX "")
   set(pck_launch_all_PREFIX ${pck_launch_all_DEVEL_PREFIX})
 else()
   set(pck_launch_all_SOURCE_PREFIX "")
   set(pck_launch_all_DEVEL_PREFIX "")
-  set(pck_launch_all_INSTALL_PREFIX /home/catkin_ws/install)
+  set(pck_launch_all_INSTALL_PREFIX /home/projet_rob_mobile/install)
   set(pck_launch_all_PREFIX ${pck_launch_all_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/catkin_ws/install/lib;/opt/ros/noetic/lib)
+    foreach(path /home/projet_rob_mobile/install/lib;/home/projet_rob_mobile/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

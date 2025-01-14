@@ -1,4 +1,4 @@
-prefix=/home/catkin_ws/devel
+prefix=/home/projet_rob_mobile/devel
 
 Name: path_find
 Description: Description of path_find

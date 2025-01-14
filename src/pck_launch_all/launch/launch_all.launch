@@ -2,13 +2,17 @@
 <launch>
 	<include file="$(find minilab_simulation)/launch/minilab_simulation.launch"/>
 	
-	<!--node pkg = "teleop_twist_keyboard" type = "teleop_twist_keyboard.py" name = "teleop_node"></node-->
+	
+	<node pkg = "teleop_twist_keyboard" type = "teleop_twist_keyboard.py" name = "teleop_node"></node>
 	<node pkg = "gmapping" type = "slam_gmapping" name = "mapping"></node>
 	<arg name = "rviz_config_file" default = "$(find pck_launch_all)/robot_model.rviz"/>
 	<!--node pkg = "path_finding" type = "path_planner" name = "path_finding"></node-->
 	<node pkg = "rviz" type = "rviz" name = "rviz" output = "screen" args = "-d $(arg rviz_config_file)"></node>
-	<node pkg="pck_launch_all" type="mark_robot_on_map.py" name="mark_robot_on_map" output="screen"></node>
+	 
+	 <!--node pkg="pck_launch_all" type="delayed_map_saver.py" name="delayed_map_saver" output="screen"/-->
+	 
+	<include file="$(find convert_img)/launch/im_conv.launch"/>
 
-	<node pkg = "pck_launch_all" type = "rand_exp" name = "rand_exp" output="screen"></node>
+	<!--node pkg = "pck_launch_all" type = "rand_exp" name = "rand_exp" output="screen"></node-->
 	
 </launch>

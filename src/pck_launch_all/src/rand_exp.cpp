@@ -26,7 +26,7 @@ int main(int argc, char **argv)
         twist.angular.z = static_cast<double>(rand() % 200 - 100) / 100.0; // Entre -1.0 et 1.0
 
         // Publier le message
-        ROS_INFO("Exploration aléatoire : linear.x = %f, angular.z = %f", twist.linear.x, twist.angular.z);
+        ROS_INFO("Exploration aleatoire : linear.x = %f, angular.z = %f", twist.linear.x, twist.angular.z);
         teleop_pub.publish(twist);
 
         ros::spinOnce();
