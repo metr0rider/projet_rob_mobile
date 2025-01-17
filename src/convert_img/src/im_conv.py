@@ -9,7 +9,7 @@ import termios
 import sys
 import tty
 from nav_msgs.srv import GetMap
-from nav_msgs.msg import OccupancyGrid
+from nav_msgs.msg import OccupancyGrid, Path
 from geometry_msgs.msg import PoseStamped, PointStamped
 from std_msgs.msg import Int32MultiArray, MultiArrayDimension, Float32MultiArray
 from visualization_msgs.msg import Marker, MarkerArray
@@ -25,6 +25,9 @@ class ImageConverter:
         
         # Publisher pour la position du robot
         self.pos_robot = rospy.Publisher('pos_robot', Float32MultiArray, queue_size=10)
+
+        # Publisher pour le chemin
+        self.path_publisher = rospy.Publisher('path', Path, queue_size=10)
 
         # Paramètres du noeud
         self.output_dir = rospy.get_param('~output_dir', '/home/projet_rob_mobile/')  # Dossier de sortie
@@ -55,9 +58,40 @@ class ImageConverter:
         return key
 
 
+    # def get_map_dimensions(self):
+    #     """
+    #     Récupère les dimensions de la carte en pixels et en mètres.
+    #     """
+    #     rospy.wait_for_service('/dynamic_map')
+    #     try:
+    #         # Appeler le service
+    #         map_service = rospy.ServiceProxy('/dynamic_map', GetMap)
+    #         response = map_service()
+
+    #         # Extraire les informations de la carte
+    #         resolution = response.map.info.resolution
+    #         width = response.map.info.width
+    #         height = response.map.info.height
+
+    #         # Calculer les dimensions en mètres
+    #         width_in_meters = width * resolution
+    #         height_in_meters = height * resolution
+
+    #         dim_meters_1pix = width_in_meters/width
+
+    #         rospy.loginfo(f"Map dimensions in pixels: {width} x {height}")
+    #         rospy.loginfo(f"Map dimensions in meters: {width_in_meters:.2f} m x {height_in_meters:.2f} m")
+    #         rospy.loginfo(f"Pixel dimensions in meters: {dim_meters_1pix:.2f} m x {dim_meters_1pix:.2f} m")
+
+    #         return width_in_meters, height_in_meters
+
+    #     except rospy.ServiceException as e:
+    #         rospy.logerr(f"Failed to call /dynamic_map service: {e}")
+    #         return None, None
+    
     def get_map_dimensions(self):
         """
-        Récupère les dimensions de la carte en pixels et en mètres.
+        Récupère les dimensions de la carte rognée en pixels et en mètres.
         """
         rospy.wait_for_service('/dynamic_map')
         try:
@@ -70,21 +104,30 @@ class ImageConverter:
             width = response.map.info.width
             height = response.map.info.height
 
-            # Calculer les dimensions en mètres
-            width_in_meters = width * resolution
-            height_in_meters = height * resolution
+            # Convertir la carte en format OpenCV
+            map_data = np.array(response.map.data, dtype=np.int8)
+            map_image = map_data.reshape((height, width))
 
-            dim_meters_1pix = width_in_meters/width
+            # Rogner la carte sur les zones contenant des pixels noirs
+            cropped_image = self.crop_to_black_area(map_image)
 
-            rospy.loginfo(f"Map dimensions in pixels: {width} x {height}")
-            rospy.loginfo(f"Map dimensions in meters: {width_in_meters:.2f} m x {height_in_meters:.2f} m")
-            rospy.loginfo(f"Pixel dimensions in meters: {dim_meters_1pix:.2f} m x {dim_meters_1pix:.2f} m")
+            # Calculer les dimensions de la carte rognée en pixels
+            cropped_height, cropped_width = cropped_image.shape
 
-            return width_in_meters, height_in_meters
+            # Calculer les dimensions de la carte rognée en mètres
+            cropped_width_in_meters = cropped_width * resolution
+            cropped_height_in_meters = cropped_height * resolution
+
+            rospy.loginfo(f"Cropped map dimensions in pixels: {cropped_width} x {cropped_height}")
+            rospy.loginfo(f"Cropped map dimensions in meters: {cropped_width_in_meters:.2f} m x {cropped_height_in_meters:.2f} m")
+            rospy.loginfo(f"Pixel dimensions in meters: {resolution:.2f} m x {resolution:.2f} m")
+
+            return cropped_width_in_meters, cropped_height_in_meters
 
         except rospy.ServiceException as e:
             rospy.logerr(f"Failed to call /dynamic_map service: {e}")
             return None, None
+
         
         
     def publish_robot_position(self):
@@ -98,6 +141,126 @@ class ImageConverter:
             rospy.loginfo(f"Published robot position: {trans}")
         except tf.Exception as e:
             rospy.logwarn(f"Could not fetch robot position: {e}")
+
+    def publish_path(self):
+        """
+        Publie une trajectoire sous forme de Path dans RViz.
+        """
+        path = Path()
+        path.header.frame_id = "map"
+        path.header.stamp = rospy.Time.now()
+
+        for point in self.trajectory:
+            pose = PoseStamped()
+            pose.header.frame_id = "map"
+            pose.header.stamp = rospy.Time.now()
+            pose.pose.position.x = point[0]
+            pose.pose.position.y = point[1]
+            pose.pose.position.z = 0.0
+            pose.pose.orientation.w = 1.0  # Orientation neutre
+            path.poses.append(pose)
+
+        self.path_publisher.publish(path)
+        rospy.loginfo(f"Published path with {len(self.trajectory)} points.")
+
+    def draw_trajectory(self, image, trajectory):
+        """
+        Trace une trajectoire en reliant les points de la liste donnée.
+
+        Args:
+            image (numpy.ndarray): Image sur laquelle tracer la trajectoire.
+            trajectory (list of tuples): Liste des points (x, y) à relier.
+            color (tuple): Couleur de la trajectoire en BGR (par défaut : rouge).
+            thickness (int): Épaisseur de la ligne (par défaut : 2).
+
+        Returns:
+            numpy.ndarray: Image avec la trajectoire tracée.
+        """
+        color = (0, 0, 255)
+        thickness = 2
+        if len(trajectory) < 2:
+            return image  # Pas assez de points pour tracer une trajectoire.
+
+        # for i in range(len(trajectory) - 1):
+        #     pt1 = trajectory[i]
+        #     pt2 = trajectory[i + 1]
+        #     cv2.line(image, pt1, pt2, color, thickness)
+        #     print('x')
+        for i in range(len(trajectory) - 1):
+            pt1 = (int(trajectory[i][0]), int(trajectory[i][1]))
+            pt2 = (int(trajectory[i + 1][0]), int(trajectory[i + 1][1]))
+            print(f"Drawing line from {pt1} to {pt2}")  # Débogage
+            cv2.line(image, pt1, pt2, color, thickness)
+
+        return image
+    
+    def on_click(self, event, x, y, flags, param):
+        """
+        Callback pour gérer les clics sur l'image et ajouter des points à la trajectoire.
+        """
+        if event == cv2.EVENT_LBUTTONDOWN:
+            rospy.loginfo(f"Point clicked: ({x}, {y})")
+            self.trajectory.append((x, y))
+            rospy.loginfo(f"Current trajectory: {self.trajectory}")
+            
+            # Convertir en CV_8U si nécessaire
+            if self.map_image.dtype == np.int8:  # Vérifie si l'image est en CV_8S
+                self.map_image = cv2.convertScaleAbs(self.map_image)
+
+            # Vérifiez et préparez l'image pour dessiner
+            if len(self.map_image.shape) == 2:  # Image en niveaux de gris
+                self.map_image_with_trajectory = cv2.cvtColor(self.map_image, cv2.COLOR_GRAY2BGR)
+            else:  # Image déjà en couleur
+                self.map_image_with_trajectory = self.map_image.copy()
+            
+            # Tracez la trajectoire
+            self.map_image_with_trajectory = self.draw_trajectory(self.map_image_with_trajectory, self.trajectory)
+
+            # Affichez l'image avec la trajectoire
+            cv2.imshow("Cropped Map", self.map_image_with_trajectory)
+            cv2.waitKey(1)  # Nécessaire pour actualiser l'affichage
+
+            # Publiez la trajectoire
+            self.publish_path()
+
+
+    
+
+    # def get_map(self):
+    #     try:
+    #         rospy.loginfo("Requesting map from /dynamic_map service...")
+    #         rospy.wait_for_service('/dynamic_map')
+    #         map_service = rospy.ServiceProxy('/dynamic_map', GetMap)
+    #         response = map_service()
+
+    #         # Convertir la carte en format OpenCV
+    #         map_data = np.array(response.map.data, dtype=np.int8)
+    #         width = response.map.info.width
+    #         height = response.map.info.height
+    #         map_image = map_data.reshape((height, width))
+    #         resolution = response.map.info.resolution
+    #         origin = response.map.info.origin.position
+
+
+    #         # Convertir les valeurs de carte
+    #         map_image_cv = np.zeros_like(map_image, dtype=np.uint8)
+    #         map_image_cv[map_image == 0] = 255  # Espaces libres -> blanc
+    #         map_image_cv[map_image == 100] = 0  # Obstacles -> noir
+    #         map_image_cv[map_image == -1] = 128  # Inconnu -> gris
+            
+    #         # Ajouter les trajectoires, le point de départ et les points d'arrêt
+    #         # self.overlay_trajectories(map_image_cv, resolution, origin)
+            
+    #         # Sauvegarder la carte en tant que fichier .pgm
+    #         map_file_path = os.path.join(self.output_dir, 'map.pgm')
+    #         cv2.imwrite(map_file_path, map_image_cv)
+    #         rospy.loginfo(f"Map saved to {map_file_path}")
+
+    #         return map_image_cv
+
+    #     except rospy.ServiceException as e:
+    #         rospy.logerr(f"Failed to get map: {e}")
+    #         return None
 
     def get_map(self):
         try:
@@ -121,15 +284,67 @@ class ImageConverter:
             map_image_cv[map_image == 100] = 0  # Obstacles -> noir
             map_image_cv[map_image == -1] = 128  # Inconnu -> gris
             
-            # Ajouter les trajectoires, le point de départ et les points d'arrêt
-            # self.overlay_trajectories(map_image_cv, resolution, origin)
-            
             # Sauvegarder la carte en tant que fichier .pgm
             map_file_path = os.path.join(self.output_dir, 'map.pgm')
             cv2.imwrite(map_file_path, map_image_cv)
             rospy.loginfo(f"Map saved to {map_file_path}")
 
+            # Afficher l'image et enregistrer les clics
+            cv2.namedWindow("Map")
+            cv2.setMouseCallback("Map", self.on_click)
+
+            while True:
+                cv2.imshow("Map", map_image_cv)
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord('q'):
+                    break
+
+            cv2.destroyAllWindows()
+
             return map_image_cv
+
+        except rospy.ServiceException as e:
+            rospy.logerr(f"Failed to get map: {e}")
+            return None
+
+    def get_cropped_map(self):
+        try:
+            rospy.loginfo("Requesting map from /dynamic_map service...")
+            rospy.wait_for_service('/dynamic_map')
+            map_service = rospy.ServiceProxy('/dynamic_map', GetMap)
+            response = map_service()
+
+            # Convertir la carte en format OpenCV
+            map_data = np.array(response.map.data, dtype=np.int8)
+            width = response.map.info.width
+            height = response.map.info.height
+            map_image = map_data.reshape((height, width))
+
+            # Rogner la carte sur les zones contenant des pixels noirs
+            cropped_image = self.crop_to_black_area(map_image)
+
+            # Sauvegarder l'image rognée originale et une copie pour tracer la trajectoire
+            self.map_image = cropped_image  # Sauvegarder l'image rognée originale
+            self.map_image_with_trajectory = self.map_image.copy()
+
+            # Sauvegarder la carte rognée
+            map_file_path = os.path.join(self.output_dir, 'cropped_map.pgm')
+            cv2.imwrite(map_file_path, cropped_image)
+            rospy.loginfo(f"Cropped map saved to {map_file_path}")
+
+            # Afficher l'image rognée et enregistrer les clics
+            cv2.namedWindow("Cropped Map")
+            cv2.setMouseCallback("Cropped Map", self.on_click)
+
+            while True:
+                cv2.imshow("Cropped Map", cropped_image)
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord('q'):
+                    break
+
+            cv2.destroyAllWindows()
+
+            return cropped_image
 
         except rospy.ServiceException as e:
             rospy.logerr(f"Failed to get map: {e}")
@@ -142,13 +357,13 @@ class ImageConverter:
             key = self.get_key()
             if key == 's':
                 rospy.loginfo("Fetching and processing map...")
-                map_image = self.get_map()
+                map_image = self.get_cropped_map()
                 if map_image is not None:
                     self.process_map(map_image)
             
             elif key == 't':
                 rospy.loginfo("Recording robot trajectory...")
-                self.publish_robot_position()
+                # self.publish_robot_position()
 
             elif key == 'd':
                 rospy.loginfo("Displaying map dimensions...")
@@ -213,8 +428,6 @@ class ImageConverter:
             binary_output_file = os.path.join(self.output_dir, 'obstacle_map.txt')
             np.savetxt(binary_output_file, binary_map, fmt='%d', delimiter='')
             rospy.loginfo(f"Obstacle map saved to {binary_output_file}")
-            
-            
 
         except Exception as e:
             rospy.logerr(f"Failed to process map: {e}")

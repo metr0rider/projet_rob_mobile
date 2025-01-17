@@ -1,8 +1,0 @@
-prefix=/home/projet_rob_mobile/devel
-
-Name: minilab_simulation
-Description: Description of minilab_simulation
-Version: 0.1.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
