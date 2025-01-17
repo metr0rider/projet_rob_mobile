@@ -1,2 +1,2 @@
 - setup-file:
-    local-name: /home/projet_rob_mobile/install/setup.sh
+    local-name: /home/catkin_ws/install/setup.sh

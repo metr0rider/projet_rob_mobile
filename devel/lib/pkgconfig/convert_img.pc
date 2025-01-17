@@ -1,4 +1,4 @@
-prefix=/home/projet_rob_mobile/devel
+prefix=/home/catkin_ws/devel
 
 Name: convert_img
 Description: Description of convert_img

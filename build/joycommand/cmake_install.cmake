@@ -1,8 +1,8 @@
-# Install script for directory: /home/projet_rob_mobile/src/joycommand
+# Install script for directory: /home/catkin_ws/src/joycommand
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/projet_rob_mobile/install")
+  set(CMAKE_INSTALL_PREFIX "/home/catkin_ws/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,17 +38,17 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/projet_rob_mobile/build/joycommand/catkin_generated/installspace/joycommand.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/catkin_ws/build/joycommand/catkin_generated/installspace/joycommand.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/joycommand/cmake" TYPE FILE FILES
-    "/home/projet_rob_mobile/build/joycommand/catkin_generated/installspace/joycommandConfig.cmake"
-    "/home/projet_rob_mobile/build/joycommand/catkin_generated/installspace/joycommandConfig-version.cmake"
+    "/home/catkin_ws/build/joycommand/catkin_generated/installspace/joycommandConfig.cmake"
+    "/home/catkin_ws/build/joycommand/catkin_generated/installspace/joycommandConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/joycommand" TYPE FILE FILES "/home/projet_rob_mobile/src/joycommand/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/joycommand" TYPE FILE FILES "/home/catkin_ws/src/joycommand/package.xml")
 endif()
 

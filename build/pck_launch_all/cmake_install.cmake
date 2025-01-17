@@ -1,8 +1,8 @@
-# Install script for directory: /home/projet_rob_mobile/src/pck_launch_all
+# Install script for directory: /home/catkin_ws/src/pck_launch_all
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/projet_rob_mobile/install")
+  set(CMAKE_INSTALL_PREFIX "/home/catkin_ws/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,22 +38,18 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/projet_rob_mobile/build/pck_launch_all/catkin_generated/installspace/pck_launch_all.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/catkin_ws/build/pck_launch_all/catkin_generated/installspace/pck_launch_all.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/pck_launch_all/cmake" TYPE FILE FILES
-    "/home/projet_rob_mobile/build/pck_launch_all/catkin_generated/installspace/pck_launch_allConfig.cmake"
-    "/home/projet_rob_mobile/build/pck_launch_all/catkin_generated/installspace/pck_launch_allConfig-version.cmake"
+    "/home/catkin_ws/build/pck_launch_all/catkin_generated/installspace/pck_launch_allConfig.cmake"
+    "/home/catkin_ws/build/pck_launch_all/catkin_generated/installspace/pck_launch_allConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/pck_launch_all" TYPE FILE FILES "/home/projet_rob_mobile/src/pck_launch_all/package.xml")
-endif()
-
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pck_launch_all" TYPE PROGRAM FILES "/home/projet_rob_mobile/build/pck_launch_all/catkin_generated/installspace/mark_robot_on_map.py")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/pck_launch_all" TYPE FILE FILES "/home/catkin_ws/src/pck_launch_all/package.xml")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)

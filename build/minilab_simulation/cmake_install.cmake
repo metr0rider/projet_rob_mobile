@@ -1,8 +1,8 @@
-# Install script for directory: /home/projet_rob_mobile/src/minilab_simulation
+# Install script for directory: /home/catkin_ws/src/minilab_simulation
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/projet_rob_mobile/install")
+  set(CMAKE_INSTALL_PREFIX "/home/catkin_ws/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,17 +38,17 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/projet_rob_mobile/build/minilab_simulation/catkin_generated/installspace/minilab_simulation.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/catkin_ws/build/minilab_simulation/catkin_generated/installspace/minilab_simulation.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/minilab_simulation/cmake" TYPE FILE FILES
-    "/home/projet_rob_mobile/build/minilab_simulation/catkin_generated/installspace/minilab_simulationConfig.cmake"
-    "/home/projet_rob_mobile/build/minilab_simulation/catkin_generated/installspace/minilab_simulationConfig-version.cmake"
+    "/home/catkin_ws/build/minilab_simulation/catkin_generated/installspace/minilab_simulationConfig.cmake"
+    "/home/catkin_ws/build/minilab_simulation/catkin_generated/installspace/minilab_simulationConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/minilab_simulation" TYPE FILE FILES "/home/projet_rob_mobile/src/minilab_simulation/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/minilab_simulation" TYPE FILE FILES "/home/catkin_ws/src/minilab_simulation/package.xml")
 endif()
 

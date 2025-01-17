@@ -1,6 +1,6 @@
 # CMake generated Testfile for 
-# Source directory: /home/projet_rob_mobile/src
-# Build directory: /home/projet_rob_mobile/build
+# Source directory: /home/catkin_ws/src
+# Build directory: /home/catkin_ws/build
 # 
 # This file includes the relevant testing commands required for 
 # testing this directory and lists subdirectories to be tested as well.

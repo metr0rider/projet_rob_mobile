@@ -1,11 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 	<include file="$(find minilab_simulation)/launch/minilab_simulation.launch"/>
-	
-<<<<<<< HEAD
-	
-=======
->>>>>>> b157bc9fbefe0d5e0a2bb8ea58a4cca1ac17fbfd
+
 	<node pkg = "teleop_twist_keyboard" type = "teleop_twist_keyboard.py" name = "teleop_node"></node>
 	<node pkg = "gmapping" type = "slam_gmapping" name = "mapping"></node>
 	<arg name = "rviz_config_file" default = "$(find pck_launch_all)/robot_model.rviz"/>

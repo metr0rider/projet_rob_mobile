@@ -1,4 +1,4 @@
-prefix=/home/projet_rob_mobile/devel
+prefix=/home/catkin_ws/devel
 
 Name: minilab_simulation
 Description: Description of minilab_simulation
