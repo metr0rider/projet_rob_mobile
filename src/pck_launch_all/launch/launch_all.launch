@@ -2,7 +2,7 @@
 <launch>
 	<include file="$(find minilab_simulation)/launch/minilab_simulation.launch"/>
 
-	<node pkg = "teleop_twist_keyboard" type = "teleop_twist_keyboard.py" name = "teleop_node"></node>
+	<!-- node pkg = "teleop_twist_keyboard" type = "teleop_twist_keyboard.py" name = "teleop_node"></node -->
 	<node pkg = "gmapping" type = "slam_gmapping" name = "mapping"></node>
 	<arg name = "rviz_config_file" default = "$(find pck_launch_all)/robot_model.rviz"/>
 	<!--node pkg = "path_finding" type = "path_planner" name = "path_finding"></node-->

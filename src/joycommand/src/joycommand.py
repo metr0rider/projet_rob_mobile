@@ -13,7 +13,6 @@ pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 def joy_callback(msg):
     # This function will be called every time a message is received on the /joy topic.
     # In this example, we're publishing the received message to the /skidbot/cmd_vel topic.
-
     # Create a Twist message from the Joy message.
     print(msg.axes)
     twist_msg.linear.x = 2.0 * msg.axes[4]  # Map the y-axis of the joystick to the linear velocity.
