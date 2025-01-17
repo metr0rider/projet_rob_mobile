@@ -1,0 +1,10 @@
+2025-01-10 13:08:39.373 [info] update#setState idle
+2025-01-10 13:09:09.329 [info] update#setState checking for updates
+2025-01-10 13:09:09.400 [info] update#setState idle
+2025-01-10 14:09:09.337 [info] update#setState checking for updates
+2025-01-10 14:09:09.510 [info] update#setState idle
+2025-01-10 15:09:09.343 [info] update#setState checking for updates
+2025-01-10 15:09:09.550 [info] update#setState idle
+2025-01-10 16:09:09.349 [info] update#setState checking for updates
+2025-01-10 16:09:09.540 [info] update#setState idle
+2025-01-10 16:54:44.364 [info] Extension host with pid 1211 exited with code: 0, signal: unknown.

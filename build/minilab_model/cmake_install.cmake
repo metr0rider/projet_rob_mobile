@@ -1,8 +1,8 @@
-# Install script for directory: /home/catkin_ws/src/minilab_model
+# Install script for directory: /home/projet_rob_mobile/src/minilab_model
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/catkin_ws/install")
+  set(CMAKE_INSTALL_PREFIX "/home/projet_rob_mobile/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,17 +38,17 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/catkin_ws/build/minilab_model/catkin_generated/installspace/minilab_model.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/projet_rob_mobile/build/minilab_model/catkin_generated/installspace/minilab_model.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/minilab_model/cmake" TYPE FILE FILES
-    "/home/catkin_ws/build/minilab_model/catkin_generated/installspace/minilab_modelConfig.cmake"
-    "/home/catkin_ws/build/minilab_model/catkin_generated/installspace/minilab_modelConfig-version.cmake"
+    "/home/projet_rob_mobile/build/minilab_model/catkin_generated/installspace/minilab_modelConfig.cmake"
+    "/home/projet_rob_mobile/build/minilab_model/catkin_generated/installspace/minilab_modelConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/minilab_model" TYPE FILE FILES "/home/catkin_ws/src/minilab_model/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/minilab_model" TYPE FILE FILES "/home/projet_rob_mobile/src/minilab_model/package.xml")
 endif()
 
