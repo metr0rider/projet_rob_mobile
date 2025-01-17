@@ -153,6 +153,7 @@ def main():
 	clean_path=point_list_cleaner(path)
 	print(clean_path)
 '''
+# on initialise le publisher de la liste de point en globale
 pub = rospy.Publisher('/path_follow', Int32MultiArray , queue_size=10)
 
 
@@ -165,25 +166,37 @@ def pos_callback(pos):
 '''	
 
 def dijk_callback(table):
-	table=dijkstra_algorithm(table_access, position_finale)
-	point_de_passage=path_find(table,position_initial)
-	point_de_passage_leger=point_list_cleaner(path)
+	#si un point d'arriver est défini, on publie
 	if (timetopublish==1):
+		#on trouve la distance de chaque point de la table par rapport au robot
+		table=dijkstra_algorithm(table_access, position_finale)
+		#on trouve le chemin le plus court vers l'arrivé
+		point_de_passage=path_find(table,position_initial)
+		#on allège la liste des points inutiles
+		point_de_passage_leger=point_list_cleaner(path)
+		#on publie la liste de point
 		pub.publish(point_de_passage_leger)
+		#on re désactive la publication
 		timetopublish=0
 	
 def pos_callback(pos):
+	#on récupère les différentes info de la position
 	point.header.stamp = rospy.get_time
 	point.header.frame_id = "/map"
 	point.point.x = pos.point.x 
 	point.point.y = pos.point.y 
 	point.point.z = pos.point.z
+	#on affiche la position à atteindre
 	rospy.loginfo("coordinates:x=%f y=%f" %(point.point.x,point.point.y))
+	#on sauvegarde cette position
 	position_finale=[point.point.x,point.point.y]
+	#on prend la position actuel du robot
 	(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
 	print(trans)
 	print(rot)
+	#on sauvegarde cette position
 	position_initial=[trans[0],trans[1]]
+	#on active le path finding
 	timetopublish=1
 
 def main():

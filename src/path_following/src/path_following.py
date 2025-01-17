@@ -16,16 +16,18 @@ def loi_commande(pos_rob,pos_obj, theta):
 	k1=1
 	k2=1
 	l1=30 #point théorique placé 30 cm devant le robot
+	#on applique un ralliement de point de passage
 	v1=k1*(pos_rob[0]-pos_obj[0])
 	v2=k2*(pos_rob[1]-pos_obj[1])
 	v=np.array(([v1],[v2]))
-	if (v1>1 || v2>2):
-		verif=0;
-	else:
-		verif=1;
 	tab=np.array(([np.cos(theta),-l1*np.sin(theta)],[np.sin(theta),l1*np.cos(theta)]))
 	invtab=np.linalg.inv(tab)
 	u=np.dot(invtab,v)
+	#si la vitesse devient trop faible, on passe au point suivant
+	if (u[0]>1 or u[1]>1):
+		verif=0;
+	else:
+		verif=1;
 	return (u)
 
 	
@@ -38,10 +40,11 @@ def main():
  
 def euler_from_quaternion(x, y, z, w):
         """
-        Convert a quaternion into euler angles (roll, pitch, yaw)
-        roll is rotation around x in radians (counterclockwise)
-        pitch is rotation around y in radians (counterclockwise)
-        yaw is rotation around z in radians (counterclockwise)
+        converti les quaternions en angles d'euler (roll, pitch, yaw)
+        x, y et z sont en radians
+        roll autour de x en sans anti horraire
+        pitch autour de y (counterclockwise)
+        yaw autour de z (counterclockwise)
         """
         t0 = +2.0 * (w * x + y * z)
         t1 = +1.0 - 2.0 * (x * x + y * y)
@@ -56,21 +59,25 @@ def euler_from_quaternion(x, y, z, w):
         t4 = +1.0 - 2.0 * (y * y + z * z)
         yaw_z = math.atan2(t3, t4)
      
-        return roll_x, pitch_y, yaw_z # in radians
+        return roll_x, pitch_y, yaw_z # en radians
 
 pub = rospy.Publisher('/cmd_vel', Twist , queue_size=10)
 
 def pos_callback(pos):
+	#pour chaque point
 	for k in range(len(pos)):
+		#on récupère la position du robot
 		(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
 		print(trans)
 		print(rot)
+		#on la convertie en angle d'euler
 		newrot=euler_from_quaternion(rot[0],rot[1],rot[2],rot[3])
-		if (verif==1):
-			u=loi_commande([trans[0],trans[1]],pos[k], newrot[2])
-			pub.publish(u)
-		else:
+		#si la vitesse est trop faible, on passe au point suivant
+		if (verif==0):
 			k=k-1
+		#sinon on garde le point précédent
+		u=loi_commande([trans[0],trans[1]],pos[k], newrot[2])
+		pub.publish(u)
 		
 
 def main():
