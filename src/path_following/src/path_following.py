@@ -4,8 +4,13 @@ import numpy as np
 import rospy
 import roslib
 import math
-
+from std_msgs.msg import Int32MultiArray
+from tf2_msgs.msg import TFMessage
+import tf
 from geometry_msgs.msg  import Twist
+
+verif=1
+rospy.init_node('path_follow')
 #commande de ralliement de point
 def loi_commande(pos_rob,pos_obj, theta):
 	k1=1
@@ -14,6 +19,10 @@ def loi_commande(pos_rob,pos_obj, theta):
 	v1=k1*(pos_rob[0]-pos_obj[0])
 	v2=k2*(pos_rob[1]-pos_obj[1])
 	v=np.array(([v1],[v2]))
+	if (v1>1 || v2>2):
+		verif=0;
+	else:
+		verif=1;
 	tab=np.array(([np.cos(theta),-l1*np.sin(theta)],[np.sin(theta),l1*np.cos(theta)]))
 	invtab=np.linalg.inv(tab)
 	u=np.dot(invtab,v)
@@ -49,7 +58,7 @@ def euler_from_quaternion(x, y, z, w):
      
         return roll_x, pitch_y, yaw_z # in radians
 
-pub = rospy.Publisher('/consigne', Int32MultiArray , queue_size=10)
+pub = rospy.Publisher('/cmd_vel', Twist , queue_size=10)
 
 def pos_callback(pos):
 	for k in range(len(pos)):
@@ -57,18 +66,18 @@ def pos_callback(pos):
 		print(trans)
 		print(rot)
 		newrot=euler_from_quaternion(rot[0],rot[1],rot[2],rot[3])
-		if (verif=1):
+		if (verif==1):
 			u=loi_commande([trans[0],trans[1]],pos[k], newrot[2])
 			pub.publish(u)
 		else:
 			k=k-1
 		
 
-def main()
+def main():
 	# Crée un node qui va récupérer les positions et la map donné par le robot.
 	listener = tf.TransformListener()
 	
-	sub = rospy.Subscriber('/path_follow',Int32MultiArray , path_callback, queue_size=10)
+	sub = rospy.Subscriber('/path_follow',Int32MultiArray , pos_callback, queue_size=10)
 	
 	# spin le node afin de recevoir les messages, et de publier la liste de point de passage.
 	rospy.spin()
