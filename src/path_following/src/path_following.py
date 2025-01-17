@@ -57,14 +57,14 @@ def pos_callback(pos):
 		print(trans)
 		print(rot)
 		newrot=euler_from_quaternion(rot[0],rot[1],rot[2],rot[3])
-		if (verif=1):
+		if (verif==1):
 			u=loi_commande([trans[0],trans[1]],pos[k], newrot[2])
 			pub.publish(u)
 		else:
 			k=k-1
 		
 
-def main()
+def main():
 	# Crée un node qui va récupérer les positions et la map donné par le robot.
 	listener = tf.TransformListener()
 	
