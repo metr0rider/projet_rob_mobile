@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/catkin_ws/devel/lib/pck_launch_all/rand_exp"
-  "/home/catkin_ws/devel/lib/pck_launch_all/rand_exp.pdb"
+  "/home/projet_rob_mobile/devel/lib/pck_launch_all/rand_exp"
+  "/home/projet_rob_mobile/devel/lib/pck_launch_all/rand_exp.pdb"
   "CMakeFiles/rand_exp.dir/src/rand_exp.cpp.o"
 )
 

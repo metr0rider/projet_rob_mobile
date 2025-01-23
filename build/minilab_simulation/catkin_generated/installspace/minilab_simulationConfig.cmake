@@ -67,14 +67,14 @@ set(minilab_simulation_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(minilab_simulation_SOURCE_PREFIX /home/catkin_ws/src/minilab_simulation)
-  set(minilab_simulation_DEVEL_PREFIX /home/catkin_ws/devel)
+  set(minilab_simulation_SOURCE_PREFIX /home/projet_rob_mobile/src/minilab_simulation)
+  set(minilab_simulation_DEVEL_PREFIX /home/projet_rob_mobile/devel)
   set(minilab_simulation_INSTALL_PREFIX "")
   set(minilab_simulation_PREFIX ${minilab_simulation_DEVEL_PREFIX})
 else()
   set(minilab_simulation_SOURCE_PREFIX "")
   set(minilab_simulation_DEVEL_PREFIX "")
-  set(minilab_simulation_INSTALL_PREFIX /home/catkin_ws/install)
+  set(minilab_simulation_INSTALL_PREFIX /home/projet_rob_mobile/install)
   set(minilab_simulation_PREFIX ${minilab_simulation_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/catkin_ws/install/lib;/opt/ros/noetic/lib)
+    foreach(path /home/projet_rob_mobile/install/lib;/home/projet_rob_mobile/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

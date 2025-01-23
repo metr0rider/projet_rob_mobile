@@ -1,4 +1,4 @@
-prefix=/home/catkin_ws/install
+prefix=/home/projet_rob_mobile/install
 
 Name: joycommand
 Description: Description of joycommand
