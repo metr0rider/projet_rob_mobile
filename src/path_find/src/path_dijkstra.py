@@ -15,17 +15,19 @@ trans=[0,0,0]
 rot=[0,0,0,0]
 listener = tf.TransformListener()
 point_de_passage_leger=[]
-timetopublish=0;
+time_to_publish=False
 position_initial=[0.0,0.0]
 position_finale=[0.0,0.0]
 
 #cette fonction permet de donner la distance minimale d'un point en le comparant à un autre
 def newval(table,pos,prevdist,table_access):
+	print("test 4")
+	stride_x= table_access.layout.dim[1].stride
 	#on vérifie tout d'abord si le point est hors de la map
 	if (pos[0]>(len(table)-1) or pos[0]<0 or pos[1]>(len(table[0])-1) or pos[1]<0):
 		return False
 	#on vérifie si le point est un mur
-	if table_access[pos[0]][pos[1]]==1:
+	if table_access.data[pos[0]*stride_x+pos[1]]==1:
 		table[pos[0]][pos[1]]=np.inf
 		return False
 	#si le point n'avait recu aucune distance précédemment, on lui donne la distance du point dont on vient plus 1
@@ -38,16 +40,19 @@ def newval(table,pos,prevdist,table_access):
 		return True
 
 def dijkstra_algorithm(table_access, pos):
+	print("test 5")
 	#on détermine les dimensions de la map à traiter
-	lenx=len(table_access)
-	leny=len(table_access[0])
+	lenx=table_access.layout.dim[0].size  #len(table_access)
+	leny=table_access.layout.dim[1].size #len(table_access[0])
 	#on crée une map entièrement faite de -1
 	table = np.ones((lenx,leny))
 	table= table*(-1)
 	#on sauvegarde la position initial du robot
-	current_pos=[pos]
+	posx=int(pos[0])
+	posy=int(pos[1])
+	current_pos=[[posx,posy]]
 	#on met le point d'origine du robot à 0
-	table[pos[0]][pos[1]]=0
+	table[posx][posy]=0
 	#tant qu'il y a des points a explorés, on cherche dans la map
 	while (current_pos!=[]):
 		newpos=[]
@@ -98,17 +103,22 @@ def dijkstra_algorithm(table_access, pos):
 	return table
 	
 def path_find(table,pos):
-	path=[pos]
-	D=table[pos[0]][pos[1]]
-	while (table[pos[0]][pos[1]]!=0):
+	print("test 2")
+	posx=int(pos[0])
+	posy=int(pos[1])
+	begin_pos=[[posx,posy]]
+	path=[begin_pos]
+	D=table[posx][posy]
+	val=[posx,posy]
+	while (table[posx][posy]!=0):
 		#on cherche le point le plus proche de la position actuel du robot, en partant de l'objectif
 		#on cherche à chaque tour de boucle le point le plus proche et on le définie comme un point de passage du robot
 		#la boucle suivante s'executera sur le point de passage nouvellement définie
 		#d'abord sur les lignes
-		for k in range(pos[0]-1,pos[0]+2):
+		for k in range(posx-1,posx+2):
 			#puis sur les colonnes
-			for i in range(pos[1]-1,pos[1]+2):
-				#on vérifie si ca distance est inférieur à la plus petite déjà identifié
+			for i in range(posy-1,posy+2):
+				#on vérifie si sa distance est inférieur à la plus petite déjà identifié
 				if table[k][i]<D:
 					#si oui, on met a jour la distance, et on sauvegarde le point
 					D=table[k][i]
@@ -122,6 +132,7 @@ def path_find(table,pos):
 	return(path)
 
 def point_list_cleaner(list_point):
+	print("test 3")
 	k=0
 	#on parcourt tout les points de la liste
 	while (k<(len(list_point)-2)):
@@ -163,23 +174,35 @@ def pos_callback(pos):
 	time.sleep(5)
 	posx=position[0].transform.translation.x
 	print(posx)
-'''	
+'''
 
-def dijk_callback(table):
+def dijk_callback(table_access):
 	#si un point d'arriver est défini, on publie
-	if (timetopublish==1):
+	global time_to_publish
+	global position_finale
+	global position_initial
+	print("test 1")
+	if (time_to_publish==True):
 		#on trouve la distance de chaque point de la table par rapport au robot
 		table=dijkstra_algorithm(table_access, position_finale)
 		#on trouve le chemin le plus court vers l'arrivé
 		point_de_passage=path_find(table,position_initial)
 		#on allège la liste des points inutiles
-		point_de_passage_leger=point_list_cleaner(path)
+		print(point_de_passage)
+		point_de_passage_leger=point_list_cleaner(point_de_passage)
 		#on publie la liste de point
+		print(point_de_passage_clean)
 		pub.publish(point_de_passage_leger)
 		#on re désactive la publication
-		timetopublish=0
+	time_to_publish=False
 	
 def pos_callback(pos):
+	global time_to_publish
+	global point
+	global position_finale
+	global trans
+	global rot
+	global position_initial
 	#on récupère les différentes info de la position
 	point.header.stamp = rospy.get_time
 	point.header.frame_id = "/map"
@@ -197,10 +220,10 @@ def pos_callback(pos):
 	#on sauvegarde cette position
 	position_initial=[trans[0],trans[1]]
 	#on active le path finding
-	timetopublish=1
+	time_to_publish=True
+	
 
 def main():
-
 	# Crée un node qui va récupérer les positions et la map donné par le robot.
 	listener = tf.TransformListener()
 	#print("test")
