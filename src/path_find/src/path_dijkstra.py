@@ -4,10 +4,33 @@ import rospy
 import numpy as np
 import time
 import tf
-from geometry_msgs.msg import PointStamped
+from geometry_msgs.msg import PointStamped, Pose, Point, Quaternion
 #from nav_msgs import GetMap
 from std_msgs.msg import Int32MultiArray
 from tf2_msgs.msg import TFMessage
+from nav_msgs.srv import GetMap
+from nav_msgs.msg import OccupancyGrid
+
+resolution =1
+# Initialisation de la position (x, y, z) de l'origine
+origin_x = 0.0  # Par exemple, à l'origine du système de coordonnées
+origin_y = 0.0
+width_map= 1.0
+height_map= 1.0
+lenx=1
+leny=1
+
+def map_callback(msg):
+	global resolution
+	global origin_x
+	global origin_y
+	global width_map
+	global height_map
+	resolution = msg.info.resolution  # Résolution en mètres par pixel
+	origin_x = msg.info.origin.position.x  # Origine de la carte (Position en coordonnées de la carte)
+	origin_y = msg.info.origin.position.y  # Origine de la carte (Position en coordonnées de la carte)
+	width_map = msg.info.width
+	height_map= msg.info.height
 
 rospy.init_node('dijkstra')
 point = PointStamped()
@@ -21,7 +44,6 @@ position_finale=[0.0,0.0]
 
 #cette fonction permet de donner la distance minimale d'un point en le comparant à un autre
 def newval(table,pos,prevdist,table_access):
-	print("test 4")
 	stride_x= table_access.layout.dim[1].stride
 	#on vérifie tout d'abord si le point est hors de la map
 	if (pos[0]>(len(table)-1) or pos[0]<0 or pos[1]>(len(table[0])-1) or pos[1]<0):
@@ -40,16 +62,18 @@ def newval(table,pos,prevdist,table_access):
 		return True
 
 def dijkstra_algorithm(table_access, pos):
-	print("test 5")
+	global lenx
+	global leny
 	#on détermine les dimensions de la map à traiter
 	lenx=table_access.layout.dim[0].size  #len(table_access)
 	leny=table_access.layout.dim[1].size #len(table_access[0])
+	print(lenx,leny)
 	#on crée une map entièrement faite de -1
 	table = np.ones((lenx,leny))
 	table= table*(-1)
 	#on sauvegarde la position initial du robot
-	posx=int(pos[0])
-	posy=int(pos[1])
+	posx=int(pos[0]*lenx)
+	posy=int(pos[1]*leny)
 	current_pos=[[posx,posy]]
 	#on met le point d'origine du robot à 0
 	table[posx][posy]=0
@@ -103,21 +127,27 @@ def dijkstra_algorithm(table_access, pos):
 	return table
 	
 def path_find(table,pos):
-	print("test 2")
-	posx=int(pos[0])
-	posy=int(pos[1])
+	global lenx
+	global leny
+	posx=int(pos[0]*lenx)
+	posy=int(pos[1]*leny)
 	begin_pos=[[posx,posy]]
-	path=[begin_pos]
+	path=[[posx,posy]]
 	D=table[posx][posy]
 	val=[posx,posy]
+	visited_positions = set()
 	while (table[posx][posy]!=0):
+		if (posx, posy) in visited_positions:
+		        print("Loop detected, stopping...")
+		        break
+		visited_positions.add((posx, posy))
 		#on cherche le point le plus proche de la position actuel du robot, en partant de l'objectif
 		#on cherche à chaque tour de boucle le point le plus proche et on le définie comme un point de passage du robot
 		#la boucle suivante s'executera sur le point de passage nouvellement définie
 		#d'abord sur les lignes
-		for k in range(posx-1,posx+2):
+		for k in range(max(0,posx-1),min(len(table),posx+2)):
 			#puis sur les colonnes
-			for i in range(posy-1,posy+2):
+			for i in range(max(0,posy-1),min(len(table[0]),posy+2)):
 				#on vérifie si sa distance est inférieur à la plus petite déjà identifié
 				if table[k][i]<D:
 					#si oui, on met a jour la distance, et on sauvegarde le point
@@ -125,6 +155,8 @@ def path_find(table,pos):
 					val=[k,i]
 		#une fois étudié tout les points autour du point de passage, on l'ajoute
 		path.append([val[0],val[1]])
+		posx=val[0]
+		posy=val[1]
 		#et on met a jour le point
 		pos=val
 	#à la fin on inverse le sens de la liste afin d'avoir la liste des points de passage dans le bon sens
@@ -132,7 +164,6 @@ def path_find(table,pos):
 	return(path)
 
 def point_list_cleaner(list_point):
-	print("test 3")
 	k=0
 	#on parcourt tout les points de la liste
 	while (k<(len(list_point)-2)):
@@ -178,21 +209,32 @@ def pos_callback(pos):
 
 def dijk_callback(table_access):
 	#si un point d'arriver est défini, on publie
+	point_list = Int32MultiArray()
 	global time_to_publish
 	global position_finale
 	global position_initial
-	print("test 1")
+	tab=[]
 	if (time_to_publish==True):
-		#on trouve la distance de chaque point de la table par rapport au robot
+		#on trouve la distance de chaque point de la table par rapport a l'arrivé
 		table=dijkstra_algorithm(table_access, position_finale)
+		#print(table)
+		with open("tableau.txt", "w") as fichier:
+    			for ligne in table:
+        			fichier.write(" ".join(map(str, ligne)) + "\n")
+		print("Le tableau a été sauvegardé dans tableau.txt.")
+		input("Appuyez sur Entrée pour continuer...")
 		#on trouve le chemin le plus court vers l'arrivé
 		point_de_passage=path_find(table,position_initial)
 		#on allège la liste des points inutiles
 		print(point_de_passage)
 		point_de_passage_leger=point_list_cleaner(point_de_passage)
 		#on publie la liste de point
-		print(point_de_passage_clean)
-		pub.publish(point_de_passage_leger)
+		for k in range (len(point_de_passage_leger)):
+			for i in range (len(point_de_passage_leger[0])):
+				tab.append(point_de_passage_leger[k][i])
+		print(tab)
+		point_list.data=tab
+		pub.publish(point_list)
 		#on re désactive la publication
 	time_to_publish=False
 	
@@ -203,22 +245,30 @@ def pos_callback(pos):
 	global trans
 	global rot
 	global position_initial
+	global resolution
+	global origin_x
+	global origin_y
+	global width_map
+	global height_map
 	#on récupère les différentes info de la position
 	point.header.stamp = rospy.get_time
 	point.header.frame_id = "/map"
-	point.point.x = pos.point.x 
-	point.point.y = pos.point.y 
+	point.point.x = ((pos.point.x - origin_x)/(resolution*width_map))
+	point.point.y = ((pos.point.y -origin_y)/(resolution*height_map))
 	point.point.z = pos.point.z
+        
 	#on affiche la position à atteindre
 	rospy.loginfo("coordinates:x=%f y=%f" %(point.point.x,point.point.y))
 	#on sauvegarde cette position
 	position_finale=[point.point.x,point.point.y]
 	#on prend la position actuel du robot
+	print(position_finale)
 	(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
 	print(trans)
 	print(rot)
 	#on sauvegarde cette position
-	position_initial=[trans[0],trans[1]]
+	position_initial=[(trans[0]-origin_x)/(resolution*width_map),(trans[1]-origin_y)/(resolution*height_map)]
+	print(position_initial)
 	#on active le path finding
 	time_to_publish=True
 	
@@ -229,6 +279,7 @@ def main():
 	#print("test")
 	#sub = rospy.Subscriber('/tf', TFMessage , pos_callback, queue_size=10)
 	#print("sub")
+	sub0 = rospy.Subscriber('/map', OccupancyGrid, map_callback)
 	sub1 = rospy.Subscriber('/binary_map_topic', Int32MultiArray , dijk_callback, queue_size=10)
 	sub2 = rospy.Subscriber('/clicked_point', PointStamped , pos_callback)
 	#print("sub1")
