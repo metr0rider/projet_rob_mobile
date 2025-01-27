@@ -49,7 +49,7 @@ def newval(table,pos,prevdist,table_access):
 	if (pos[0]>(len(table)-1) or pos[0]<0 or pos[1]>(len(table[0])-1) or pos[1]<0):
 		return False
 	#on vérifie si le point est un mur
-	if table_access.data[pos[0]*stride_x+pos[1]]==1:
+	if table_access.data[pos[1]*stride_x+pos[0]]==1:
 		table[pos[0]][pos[1]]=np.inf
 		return False
 	#si le point n'avait recu aucune distance précédemment, on lui donne la distance du point dont on vient plus 1
@@ -65,8 +65,8 @@ def dijkstra_algorithm(table_access, pos):
 	global lenx
 	global leny
 	#on détermine les dimensions de la map à traiter
-	lenx=table_access.layout.dim[0].size  #len(table_access)
-	leny=table_access.layout.dim[1].size #len(table_access[0])
+	lenx=table_access.layout.dim[1].size  #len(table_access)
+	leny=table_access.layout.dim[0].size #len(table_access[0])
 	print(lenx,leny)
 	#on crée une map entièrement faite de -1
 	table = np.ones((lenx,leny))
@@ -74,6 +74,7 @@ def dijkstra_algorithm(table_access, pos):
 	#on sauvegarde la position initial du robot
 	posx=int(pos[0]*lenx)
 	posy=int(pos[1]*leny)
+	print(posx,posy)
 	current_pos=[[posx,posy]]
 	#on met le point d'origine du robot à 0
 	table[posx][posy]=0
@@ -126,11 +127,14 @@ def dijkstra_algorithm(table_access, pos):
 		current_pos=newpos
 	return table
 	
-def path_find(table,pos):
+def path_find(table,pos,table_access):
+	stride_x= table_access.layout.dim[1].stride
+	print(stride_x)
 	global lenx
 	global leny
 	posx=int(pos[0]*lenx)
 	posy=int(pos[1]*leny)
+	print(posx,posy)
 	begin_pos=[[posx,posy]]
 	path=[[posx,posy]]
 	D=table[posx][posy]
@@ -138,8 +142,9 @@ def path_find(table,pos):
 	visited_positions = set()
 	while (table[posx][posy]!=0):
 		if (posx, posy) in visited_positions:
-		        print("Loop detected, stopping...")
-		        break
+			print(table_access.data[posy*stride_x+posx])
+			print("Loop detected, stopping...")
+			break
 		visited_positions.add((posx, posy))
 		#on cherche le point le plus proche de la position actuel du robot, en partant de l'objectif
 		#on cherche à chaque tour de boucle le point le plus proche et on le définie comme un point de passage du robot
@@ -160,7 +165,7 @@ def path_find(table,pos):
 		#et on met a jour le point
 		pos=val
 	#à la fin on inverse le sens de la liste afin d'avoir la liste des points de passage dans le bon sens
-	path.reverse()
+	#path.reverse()
 	return(path)
 
 def point_list_cleaner(list_point):
@@ -218,13 +223,13 @@ def dijk_callback(table_access):
 		#on trouve la distance de chaque point de la table par rapport a l'arrivé
 		table=dijkstra_algorithm(table_access, position_finale)
 		#print(table)
-		with open("tableau.txt", "w") as fichier:
-    			for ligne in table:
-        			fichier.write(" ".join(map(str, ligne)) + "\n")
-		print("Le tableau a été sauvegardé dans tableau.txt.")
-		input("Appuyez sur Entrée pour continuer...")
+		#with open("tableau.txt", "w") as fichier:
+    		#	for ligne in table:
+        	#		fichier.write(" ".join(map(str, ligne)) + "\n")
+		#print("Le tableau a été sauvegardé dans tableau.txt.")
+		#input("Appuyez sur Entrée pour continuer...")
 		#on trouve le chemin le plus court vers l'arrivé
-		point_de_passage=path_find(table,position_initial)
+		point_de_passage=path_find(table,position_initial,table_access)
 		#on allège la liste des points inutiles
 		print(point_de_passage)
 		point_de_passage_leger=point_list_cleaner(point_de_passage)
@@ -250,6 +255,10 @@ def pos_callback(pos):
 	global origin_y
 	global width_map
 	global height_map
+	#print(origin_x)
+	#print(origin_y)
+	#print(width_map)
+	#print(height_map)
 	#on récupère les différentes info de la position
 	point.header.stamp = rospy.get_time
 	point.header.frame_id = "/map"
@@ -264,8 +273,8 @@ def pos_callback(pos):
 	#on prend la position actuel du robot
 	print(position_finale)
 	(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
-	print(trans)
-	print(rot)
+	#print(trans)
+	#print(rot)
 	#on sauvegarde cette position
 	position_initial=[(trans[0]-origin_x)/(resolution*width_map),(trans[1]-origin_y)/(resolution*height_map)]
 	print(position_initial)
