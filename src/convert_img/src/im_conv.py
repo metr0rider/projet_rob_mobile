@@ -11,7 +11,7 @@ import tty
 from nav_msgs.srv import GetMap
 from nav_msgs.msg import OccupancyGrid, Path
 from geometry_msgs.msg import PoseStamped, PointStamped
-from std_msgs.msg import Int32MultiArray, MultiArrayDimension, Float32MultiArray
+from std_msgs.msg import Int32MultiArray, MultiArrayDimension, Float32MultiArray, Float64MultiArray
 from visualization_msgs.msg import Marker, MarkerArray
 
 class ImageConverter:
@@ -27,6 +27,9 @@ class ImageConverter:
 
         # Publisher pour le chemin
         self.path_publisher = rospy.Publisher('path', Path, queue_size=10)
+
+        # Publisher pour les coins de la carte
+        self.corners_publisher = rospy.Publisher('map_corners', Float64MultiArray, queue_size=10)
 
         # Paramètres du noeud
         self.output_dir = rospy.get_param('~output_dir', '/home/projet_rob_mobile/')  # Dossier de sortie
@@ -44,6 +47,34 @@ class ImageConverter:
             os.makedirs(self.output_dir)
 
         self.run()
+
+    def publish_corners(self, cropped_image, resolution, origin):
+        """
+        Publie les coordonnées des coins de la carte rognée (en haut à gauche, en haut à droite, en bas à gauche).
+        
+        Args:
+            cropped_image (numpy.ndarray): Carte rognée.
+            resolution (float): Résolution de la carte (mètres par pixel).
+            origin (tuple): Origine de la carte (en mètres).
+        """
+        height, width = cropped_image.shape
+
+        # Calculer les coordonnées des coins en mètres
+        top_left = (origin[0], origin[1])
+        top_right = (origin[0] + width * resolution, origin[1])
+        bottom_left = (origin[0], origin[1] + height * resolution)
+
+        # Préparer le message
+        corners_msg = Float64MultiArray()
+        corners_msg.data = [
+            top_left[0], top_left[1],
+            top_right[0], top_right[1],
+            bottom_left[0], bottom_left[1]
+        ]
+
+        # Publier le message
+        self.corners_publisher.publish(corners_msg)
+        rospy.loginfo(f"Published corners: Top Left {top_left}, Top Right {top_right}, Bottom Left {bottom_left}")
 
     def get_key(self):
         """Capture une touche entrée dans le terminal."""
@@ -322,6 +353,21 @@ class ImageConverter:
             # Identifier et rogner la zone avec le maximum de pixels noirs
             cropped_image = self.crop_to_black_area(map_image)
 
+            rospy.loginfo("Requesting map from /dynamic_map service...")
+            rospy.wait_for_service('/dynamic_map')
+            map_service = rospy.ServiceProxy('/dynamic_map', GetMap)
+            response = map_service()
+
+            # Convertir la carte en format OpenCV
+            map_data = np.array(response.map.data, dtype=np.int8)
+            width = response.map.info.width
+            height = response.map.info.height
+            map_image = map_data.reshape((height, width))
+            resolution = response.map.info.resolution
+            # Extraire les coordonnées de l'origine
+            origin = (response.map.info.origin.position.x, response.map.info.origin.position.y)
+
+
             # Grossir l'image
             scaled_image = cv2.resize(
                 cropped_image,
@@ -330,6 +376,12 @@ class ImageConverter:
                 fy=self.scale_factor,
                 interpolation=cv2.INTER_NEAREST
             )
+
+            height, width = scaled_image.shape
+            rospy.loginfo(f"Scaled image dimensions: {width} x {height}")
+
+            # Publier les coordonnées des coins de la carte rognée
+            self.publish_corners(scaled_image, resolution, origin)
 
             # Appliquer le traitement des pixels noirs
             processed_image = self.expand_black_pixels(scaled_image)
