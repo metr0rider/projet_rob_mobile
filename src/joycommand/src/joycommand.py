@@ -15,9 +15,9 @@ def joy_callback(msg):
     # In this example, we're publishing the received message to the /skidbot/cmd_vel topic.
     # Create a Twist message from the Joy message.
     print(msg.axes)
-    twist_msg.linear.x = 2.0 * msg.axes[4]  # Map the y-axis of the joystick to the linear velocity.
-    twist_msg.angular.z = 2.0 * msg.axes[3]  # Map the x-axis of the joystick to the angular velocity.
-
+    twist_msg.linear.x = 3.0 * msg.axes[4]  # Map the y-axis of the joystick to the linear velocity.
+    twist_msg.angular.z = 1.5 * msg.axes[3]  # Map the x-axis of the joystick to the angular velocity.
+    print(msg.buttons)
     # Publish the Twist message to the /skidbot/cmd_vel topic.
     pub.publish(twist_msg)
 
