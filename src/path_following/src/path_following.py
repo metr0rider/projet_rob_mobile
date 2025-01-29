@@ -30,6 +30,7 @@ def loi_commande(pos_rob,pos_obj, theta):
 	tab=np.array(([np.cos(theta),-l1*np.sin(theta)],[np.sin(theta),l1*np.cos(theta)]))
 	invtab=np.linalg.inv(tab)
 	u=np.dot(invtab,v)
+	u[1]=-u[1]
 	#si la vitesse devient trop faible, on passe au point suivant
 	if (u[0]>1):
 		verif=0;
