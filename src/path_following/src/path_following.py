@@ -10,6 +10,7 @@ import tf
 from geometry_msgs.msg  import Twist
 from std_msgs.msg import Float64MultiArray
 
+rospy.init_node('path_follow')
 origin_x = 1.0
 origin_y =1.0
 corner_top_right_x =1.0
@@ -20,7 +21,6 @@ leny=1.0
 verif=1
 
 listener = tf.TransformListener()
-rospy.init_node('path_follow')
 #commande de ralliement de point
 def loi_commande(pos_rob,pos_obj, theta):
 	k1=2
