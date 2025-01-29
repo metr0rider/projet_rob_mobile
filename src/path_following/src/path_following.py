@@ -18,6 +18,8 @@ corner_bottom_left_x =1.0
 corner_bottom_left_y =1.0
 leny=1.0
 verif=1
+
+listener = tf.TransformListener()
 rospy.init_node('path_follow')
 #commande de ralliement de point
 def loi_commande(pos_rob,pos_obj, theta):
@@ -107,6 +109,7 @@ def pos_callback(pos):
 		pub.publish(u)
 
 def corners_callback(msg):
+
 	global origin_x
 	global origin_y
 	global corner_top_right_x
