@@ -250,8 +250,8 @@ def dijk_callback(table_access):
 	if (time_to_publish==True):
 		ratio_x=lenx/(corner_top_right_x-origin_x)
 		ratio_y=leny/(corner_bottom_left_y-origin_y)
-		position_finale=[position_finale[0]*ratio_x,leny-(position_finale[1]*ratio_y)]
-		position_initial=[position_initial[0]*ratio_x,leny-(position_initial[1]*ratio_y)]
+		position_finale=[(position_finale[0]-origin_x)*ratio_x,leny-((position_finale[1]-origin_y)*ratio_y)]
+		position_initial=[(position_initial[0]-origin_x)*ratio_x,leny-((position_initial[1]-origin_y)*ratio_y)]
 		#on trouve la distance de chaque point de la table par rapport a l'arrivé
 		table=dijkstra_algorithm(table_access, position_finale)
 		#print(table)

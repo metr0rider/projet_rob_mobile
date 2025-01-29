@@ -9,12 +9,12 @@ from tf2_msgs.msg import TFMessage
 import tf
 from geometry_msgs.msg  import Twist
 
-origin_x
-origin_y
-corner_top_right_x
-corner_top_right_y
-corner_bottom_left_x
-corner_bottom_left_y
+origin_x = 1.0
+origin_y =1.0
+corner_top_right_x =1.0
+corner_top_right_y =1.0
+corner_bottom_left_x =1.0
+corner_bottom_left_y =1.0
 leny
 verif=1
 rospy.init_node('path_follow')
@@ -77,6 +77,12 @@ def len_callback(table_access):
 
 
 def pos_callback(pos):
+	global origin_x
+	global origin_y
+	global corner_top_right_x
+	global corner_top_right_y
+	global corner_bottom_left_x
+	global corner_bottom_left_y
 	#pour chaque point
 	for k in range(len(pos)):
 		#on récupère la position du robot
@@ -88,7 +94,7 @@ def pos_callback(pos):
 		#on la convertie en angle d'euler
 		newrot=euler_from_quaternion(rot[0],rot[1],rot[2],rot[3])
 		position=[trans[0],trans[1]]
-		position=[position[0]*ratio_x,leny-(position[1]*ratio_y)]
+		position=[(position[0]-origin_x)*ratio_x,leny-((position[1]-origin_y)*ratio_y)]
 		#si la vitesse est trop faible, on passe au point suivant
 		if (verif==0):
 			k=k-1
