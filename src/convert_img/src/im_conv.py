@@ -48,33 +48,33 @@ class ImageConverter:
 
         self.run()
 
-    def publish_corners(self, cropped_image, resolution, origin):
-        """
-        Publie les coordonnées des coins de la carte rognée (en haut à gauche, en haut à droite, en bas à gauche).
+    # def publish_corners(self, cropped_image, resolution, origin):
+    #     """
+    #     Publie les coordonnées des coins de la carte rognée (en haut à gauche, en haut à droite, en bas à gauche).
         
-        Args:
-            cropped_image (numpy.ndarray): Carte rognée.
-            resolution (float): Résolution de la carte (mètres par pixel).
-            origin (tuple): Origine de la carte (en mètres).
-        """
-        height, width = cropped_image.shape
+    #     Args:
+    #         cropped_image (numpy.ndarray): Carte rognée.
+    #         resolution (float): Résolution de la carte (mètres par pixel).
+    #         origin (tuple): Origine de la carte (en mètres).
+    #     """
+    #     height, width = cropped_image.shape
 
-        # Calculer les coordonnées des coins en mètres
-        top_left = (origin[0], origin[1])
-        top_right = (origin[0] + width * resolution, origin[1])
-        bottom_left = (origin[0], origin[1] + height * resolution)
+    #     # Calculer les coordonnées des coins en mètres
+    #     top_left = (origin[0], origin[1])
+    #     top_right = (origin[0] + width * resolution, origin[1])
+    #     bottom_left = (origin[0], origin[1] + height * resolution)
 
-        # Préparer le message
-        corners_msg = Float64MultiArray()
-        corners_msg.data = [
-            top_left[0], top_left[1],
-            top_right[0], top_right[1],
-            bottom_left[0], bottom_left[1]
-        ]
+    #     # Préparer le message
+    #     corners_msg = Float64MultiArray()
+    #     corners_msg.data = [
+    #         top_left[0], top_left[1],
+    #         top_right[0], top_right[1],
+    #         bottom_left[0], bottom_left[1]
+    #     ]
 
-        # Publier le message
-        self.corners_publisher.publish(corners_msg)
-        rospy.loginfo(f"Published corners: Top Left {top_left}, Top Right {top_right}, Bottom Left {bottom_left}")
+    #     # Publier le message
+    #     self.corners_publisher.publish(corners_msg)
+    #     rospy.loginfo(f"Published corners: Top Left {top_left}, Top Right {top_right}, Bottom Left {bottom_left}")
 
     def get_key(self):
         """Capture une touche entrée dans le terminal."""
@@ -351,7 +351,8 @@ class ImageConverter:
             rospy.loginfo(f"Map image loaded: {map_image.shape}")
 
             # Identifier et rogner la zone avec le maximum de pixels noirs
-            cropped_image = self.crop_to_black_area(map_image)
+            # cropped_image = self.crop_to_black_area(map_image)
+            cropped_image, x_min, y_min = self.crop_to_black_area(map_image)
 
             rospy.loginfo("Requesting map from /dynamic_map service...")
             rospy.wait_for_service('/dynamic_map')
@@ -367,6 +368,23 @@ class ImageConverter:
             # Extraire les coordonnées de l'origine
             origin = (response.map.info.origin.position.x, response.map.info.origin.position.y)
 
+            # Extraire les coordonnées de l'origine de la carte entière
+            origin_x = response.map.info.origin.position.x
+            origin_y = response.map.info.origin.position.y
+
+            rospy.loginfo(f"Original origin: ({origin_x}, {origin_y})")
+            rospy.loginfo(f"x_min, y_min in pixels: ({x_min}, {y_min})")
+            rospy.loginfo(f"Resolution: {resolution}")
+
+            # Calculer la nouvelle origine après rognage
+            offset_x = x_min * resolution
+            offset_y = y_min * resolution
+
+            new_origin_x = origin_x + offset_x
+            new_origin_y = origin_y + offset_y
+
+            rospy.loginfo(f"New origin (before scaling): ({new_origin_x}, {new_origin_y})")
+
 
             # Grossir l'image
             scaled_image = cv2.resize(
@@ -377,11 +395,39 @@ class ImageConverter:
                 interpolation=cv2.INTER_NEAREST
             )
 
+            height, width = cropped_image.shape
+            rospy.loginfo(f"height and width: ({height}, {width})")
+
+            # Calculer les coordonnées des coins en mètres
+            # top_left = (new_origin_x, new_origin_y)
+            # top_right = (new_origin_x + width * resolution, new_origin_y)
+            # bottom_left = (new_origin_x, new_origin_y + height * resolution)
+
+            top_left = (new_origin_x, new_origin_y + height * resolution)
+            top_right = (new_origin_x + width * resolution, new_origin_y + height*resolution)
+            bottom_left = (new_origin_x, new_origin_y)
+
+            # Préparer le message
+            corners_msg = Float64MultiArray()
+            corners_msg.data = [
+                top_left[0], top_left[1],
+                top_right[0], top_right[1],
+                bottom_left[0], bottom_left[1]
+            ]
+
+            # Publier le message
+            self.corners_publisher.publish(corners_msg)
+            rospy.loginfo(f"Published corners: Top Left {top_left}, Top Right {top_right}, Bottom Left {bottom_left}")
+
+            
+            #rospy.loginfo(f"New origin (after scaling): ({new_origin_x}, {new_origin_y})")
+
             height, width = scaled_image.shape
             rospy.loginfo(f"Scaled image dimensions: {width} x {height}")
 
             # Publier les coordonnées des coins de la carte rognée
-            self.publish_corners(scaled_image, resolution, origin)
+            # self.publish_corners(scaled_image, resolution, origin)
+            #self.publish_corners(scaled_image, resolution * self.scale_factor, (new_origin_x, new_origin_y))
 
             # Appliquer le traitement des pixels noirs
             processed_image = self.expand_black_pixels(scaled_image)
@@ -421,22 +467,49 @@ class ImageConverter:
             rospy.logerr(f"Failed to process map: {e}")
 
 
+    # def crop_to_black_area(self, image):
+    #     """
+    #     Identifie et rogner la zone contenant le maximum de pixels noirs dans l'image.
+    #     """
+    #     black_pixels = np.where(image == 0)
+
+    #     if black_pixels[0].size == 0 or black_pixels[1].size == 0:
+    #         rospy.logwarn("No black pixels detected in the image.")
+    #         return image
+
+    #     min_row, max_row = np.min(black_pixels[0]), np.max(black_pixels[0])
+    #     min_col, max_col = np.min(black_pixels[1]), np.max(black_pixels[1])
+
+    #     rospy.loginfo(f"Cropping to rectangle: ({min_row}, {min_col}) - ({max_row}, {max_col})")
+    #     cropped_image = image[min_row:max_row + 1, min_col:max_col + 1]
+    #     return cropped_image
+
     def crop_to_black_area(self, image):
         """
-        Identifie et rogner la zone contenant le maximum de pixels noirs dans l'image.
+        Identifie et rogne la zone contenant le maximum de pixels noirs dans l'image.
+        Retourne aussi les coordonnées x_min et y_min du coin supérieur gauche.
         """
         black_pixels = np.where(image == 0)
 
         if black_pixels[0].size == 0 or black_pixels[1].size == 0:
             rospy.logwarn("No black pixels detected in the image.")
-            return image
+            return image, 0, 0  # Retourne l'image complète avec (x_min=0, y_min=0) si aucun noir n'est détecté
 
+        # Trouver les limites de la zone noire
         min_row, max_row = np.min(black_pixels[0]), np.max(black_pixels[0])
         min_col, max_col = np.min(black_pixels[1]), np.max(black_pixels[1])
 
         rospy.loginfo(f"Cropping to rectangle: ({min_row}, {min_col}) - ({max_row}, {max_col})")
+
+        # Rogner l’image
         cropped_image = image[min_row:max_row + 1, min_col:max_col + 1]
-        return cropped_image
+
+        # min_col correspond à x_min (abscisse) et min_row correspond à y_min (ordonnée)
+        x_min, y_min = min_col, min_row
+        print(f"X_min: {x_min}, Y_min: {y_min}")
+
+        return cropped_image, x_min, y_min
+
 
     def expand_black_pixels(self, image):
         """

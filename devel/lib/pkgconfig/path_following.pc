@@ -1,0 +1,8 @@
+prefix=/home/projet_rob_mobile/devel
+
+Name: path_following
+Description: Description of path_following
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
