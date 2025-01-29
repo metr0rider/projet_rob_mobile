@@ -15,7 +15,7 @@ corner_top_right_x =1.0
 corner_top_right_y =1.0
 corner_bottom_left_x =1.0
 corner_bottom_left_y =1.0
-leny
+leny=1.0
 verif=1
 rospy.init_node('path_follow')
 #commande de ralliement de point
