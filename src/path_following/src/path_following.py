@@ -85,7 +85,7 @@ def pos_callback(pos):
 	global corner_bottom_left_x
 	global corner_bottom_left_y
 	#pour chaque point
-	for k in range(len(pos)):
+	for k in range(len(pos.data)/2):
 		#on récupère la position du robot
 		(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
 		print(trans)
@@ -100,7 +100,7 @@ def pos_callback(pos):
 		if (verif==0):
 			k=k-1
 		#sinon on garde le point précédent
-		u=loi_commande([trans[0],trans[1]],pos[k], newrot[2])
+		u=loi_commande([trans[0],trans[1]],[pos[2*k],pos[2*k+1]], newrot[2])
 		pub.publish(u)
 
 def corners_callback(msg):
