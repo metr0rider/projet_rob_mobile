@@ -24,6 +24,7 @@ verif=1
 listener = tf.TransformListener()
 #commande de ralliement de point
 def loi_commande(pos_rob,pos_obj, theta):
+	global verif
 	k1=1
 	k2=1
 	l1=30 #point théorique placé 30 cm devant le robot
@@ -92,6 +93,7 @@ def pos_callback(pos):
 	global corner_bottom_left_y
 	global lenx
 	global leny
+	global verif
 	#pour chaque point
 	print(len(pos.data)/2)
 	length=int(len(pos.data)/2)
