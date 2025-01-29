@@ -88,7 +88,7 @@ def pos_callback(pos):
 	print(len(pos.data)/2)
 	length=int(len(pos.data)/2)
 	print(length)
-	for k in range(len):
+	for k in range(length):
 		#on récupère la position du robot
 		(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
 		print(trans)
