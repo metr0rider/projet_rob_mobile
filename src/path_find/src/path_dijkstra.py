@@ -7,32 +7,50 @@ import tf
 from geometry_msgs.msg import PointStamped, Pose, Point, Quaternion
 #from nav_msgs import GetMap
 from std_msgs.msg import Int32MultiArray
+from std_msgs.msg import Float64MultiArray
 from tf2_msgs.msg import TFMessage
 from nav_msgs.srv import GetMap
 from nav_msgs.msg import OccupancyGrid
 
+
+rospy.init_node('dijkstra')
 resolution =1
 # Initialisation de la position (x, y, z) de l'origine
 origin_x = 0.0  # Par exemple, à l'origine du système de coordonnées
 origin_y = 0.0
+corner_top_right_x = 1.0
+corner_top_right_y = 0.0
+corner_bottom_left_x = 0.0
+corner_bottom_left_y = -1.0
 width_map= 1.0
 height_map= 1.0
 lenx=1
 leny=1
-
+ratio_x=1.0
+ratio_y=1.0
 def map_callback(msg):
 	global resolution
-	global origin_x
-	global origin_y
 	global width_map
 	global height_map
 	resolution = msg.info.resolution  # Résolution en mètres par pixel
-	origin_x = msg.info.origin.position.x  # Origine de la carte (Position en coordonnées de la carte)
-	origin_y = msg.info.origin.position.y  # Origine de la carte (Position en coordonnées de la carte)
 	width_map = msg.info.width
 	height_map= msg.info.height
 
-rospy.init_node('dijkstra')
+def corners_callback(msg):
+	global origin_x
+	global origin_y
+	global corner_top_right_x
+	global corner_top_right_y
+	global corner_bottom_left_x
+	global corner_bottom_left_y
+	origin_x = msg.data[0]  # Origine de la carte (Position en coordonnées de la carte)
+	origin_y = msg.data[1]  # Origine de la carte (Position en coordonnées de la carte)
+	corner_top_right_x=msg.data[2]
+	corner_top_right_y=msg.data[3]
+	corner_bottom_left_x=msg.data[4]
+	corner_bottom_left_y=msg.data[5]
+
+
 point = PointStamped()
 trans=[0,0,0]
 rot=[0,0,0,0]
@@ -64,10 +82,6 @@ def newval(table,pos,prevdist,table_access):
 def dijkstra_algorithm(table_access, pos):
 	global lenx
 	global leny
-	#on détermine les dimensions de la map à traiter
-	lenx=table_access.layout.dim[1].size  #len(table_access)
-	leny=table_access.layout.dim[0].size #len(table_access[0])
-	print(lenx,leny)
 	#on crée une map entièrement faite de -1
 	table = np.ones((lenx,leny))
 	table= table*(-1)
@@ -218,8 +232,26 @@ def dijk_callback(table_access):
 	global time_to_publish
 	global position_finale
 	global position_initial
+	global origin_x
+	global origin_y
+	global corner_top_right_x
+	global corner_top_right_y
+	global corner_bottom_left_x
+	global corner_bottom_left_y
+	global lenx
+	global leny
+	global ratio_x
+	global ratio_y
+	#on détermine les dimensions de la map à traiter
+	lenx=table_access.layout.dim[1].size  #len(table_access)
+	leny=table_access.layout.dim[0].size #len(table_access[0])
+	print(lenx,leny)
 	tab=[]
 	if (time_to_publish==True):
+		ratio_x=lenx/(corner_top_right_x-origin_x)
+		ratio_y=leny/(corner_bottom_left_y-origin_y)
+		position_finale=[position_finale[0]*ratio_x,leny-(position_finale[1]*ratio_y)]
+		position_initial=[position_initial[0]*ratio_x,leny-(position_initial[1]*ratio_y)]
 		#on trouve la distance de chaque point de la table par rapport a l'arrivé
 		table=dijkstra_algorithm(table_access, position_finale)
 		#print(table)
@@ -251,10 +283,6 @@ def pos_callback(pos):
 	global rot
 	global position_initial
 	global resolution
-	global origin_x
-	global origin_y
-	global width_map
-	global height_map
 	#print(origin_x)
 	#print(origin_y)
 	#print(width_map)
@@ -262,8 +290,8 @@ def pos_callback(pos):
 	#on récupère les différentes info de la position
 	point.header.stamp = rospy.get_time
 	point.header.frame_id = "/map"
-	point.point.x = ((pos.point.x - origin_x)/(resolution*width_map))
-	point.point.y = ((pos.point.y -origin_y)/(resolution*height_map))
+	point.point.x = pos.point.x
+	point.point.y = pos.point.y
 	point.point.z = pos.point.z
         
 	#on affiche la position à atteindre
@@ -291,6 +319,7 @@ def main():
 	sub0 = rospy.Subscriber('/map', OccupancyGrid, map_callback)
 	sub1 = rospy.Subscriber('/binary_map_topic', Int32MultiArray , dijk_callback, queue_size=10)
 	sub2 = rospy.Subscriber('/clicked_point', PointStamped , pos_callback)
+	sub3 = rospy.Subscriber('/map_corners', Float64MultiArray , corners_callback)
 	#print("sub1")
 	# spin le node afin de recevoir les messages, et de publier la liste de point de passage.
 	rospy.spin()
