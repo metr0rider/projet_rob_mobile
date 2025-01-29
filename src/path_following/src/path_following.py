@@ -99,8 +99,8 @@ def pos_callback(pos):
 	for k in range(length):
 		#on récupère la position du robot
 		(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
-		print(trans)
-		print(rot)
+		#print(trans)
+		#print(rot)
 		ratio_x=lenx/(corner_top_right_x-origin_x)
 		ratio_y=leny/(corner_bottom_left_y-origin_y)
 		#on la convertie en angle d'euler
@@ -112,6 +112,7 @@ def pos_callback(pos):
 			k=k-1
 		#sinon on garde le point précédent
 		u=loi_commande([trans[0],trans[1]],[pos.data[2*k],pos.data[2*k+1]], newrot[2])
+		print(u)
 		cmd_vel.linear.x=u[0]
 		cmd_vel.linear.y=0
 		cmd_vel.linear.z=0
