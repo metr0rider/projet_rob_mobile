@@ -86,8 +86,8 @@ def dijkstra_algorithm(table_access, pos):
 	table = np.ones((lenx,leny))
 	table= table*(-1)
 	#on sauvegarde la position initial du robot
-	posx=int(pos[0]*lenx)
-	posy=int(pos[1]*leny)
+	posx=int(pos[0])
+	posy=int(pos[1])
 	print(posx,posy)
 	current_pos=[[posx,posy]]
 	#on met le point d'origine du robot à 0
@@ -146,8 +146,8 @@ def path_find(table,pos,table_access):
 	print(stride_x)
 	global lenx
 	global leny
-	posx=int(pos[0]*lenx)
-	posy=int(pos[1]*leny)
+	posx=int(pos[0])
+	posy=int(pos[1])
 	print(posx,posy)
 	begin_pos=[[posx,posy]]
 	path=[[posx,posy]]
