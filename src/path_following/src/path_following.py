@@ -83,6 +83,7 @@ def len_callback(table_access):
 
 
 def pos_callback(pos):
+	cmd_vel= Twist()
 	global origin_x
 	global origin_y
 	global corner_top_right_x
@@ -111,7 +112,14 @@ def pos_callback(pos):
 			k=k-1
 		#sinon on garde le point précédent
 		u=loi_commande([trans[0],trans[1]],[pos.data[2*k],pos.data[2*k+1]], newrot[2])
-		pub.publish(u)
+		cmd_vel.linear.x=u[0]
+		cmd_vel.linear.y=0
+		cmd_vel.linear.z=0
+		cmd_vel.angular.x=0
+		cmd_vel.angular.y=0
+		cmd_vel.angular.z=u[1]
+		
+		pub.publish(cmd_vel)
 
 def corners_callback(msg):
 
