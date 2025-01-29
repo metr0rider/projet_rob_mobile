@@ -110,7 +110,7 @@ def pos_callback(pos):
 		if (verif==0):
 			k=k-1
 		#sinon on garde le point précédent
-		u=loi_commande([trans[0],trans[1]],[pos[2*k],pos[2*k+1]], newrot[2])
+		u=loi_commande([trans[0],trans[1]],[pos.data[2*k],pos.data[2*k+1]], newrot[2])
 		pub.publish(u)
 
 def corners_callback(msg):
