@@ -304,7 +304,7 @@ def pos_callback(pos):
 	#print(trans)
 	#print(rot)
 	#on sauvegarde cette position
-	position_initial=[(trans[0]-origin_x)/(resolution*width_map),(trans[1]-origin_y)/(resolution*height_map)]
+	position_initial=[trans[0],trans[1]]
 	print(position_initial)
 	#on active le path finding
 	time_to_publish=True

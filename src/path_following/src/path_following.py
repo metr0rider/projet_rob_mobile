@@ -9,11 +9,18 @@ from tf2_msgs.msg import TFMessage
 import tf
 from geometry_msgs.msg  import Twist
 
+origin_x
+origin_y
+corner_top_right_x
+corner_top_right_y
+corner_bottom_left_x
+corner_bottom_left_y
+leny
 verif=1
 rospy.init_node('path_follow')
 #commande de ralliement de point
 def loi_commande(pos_rob,pos_obj, theta):
-	k1=1
+	k1=2
 	k2=1
 	l1=30 #point théorique placé 30 cm devant le robot
 	#on applique un ralliement de point de passage
@@ -24,7 +31,7 @@ def loi_commande(pos_rob,pos_obj, theta):
 	invtab=np.linalg.inv(tab)
 	u=np.dot(invtab,v)
 	#si la vitesse devient trop faible, on passe au point suivant
-	if (u[0]>1 or u[1]>1):
+	if (u[0]>1):
 		verif=0;
 	else:
 		verif=1;
@@ -63,6 +70,11 @@ def euler_from_quaternion(x, y, z, w):
 
 pub = rospy.Publisher('/cmd_vel', Twist , queue_size=10)
 
+def len_callback(table_access):
+	global leny
+	leny=table_access.layout.dim[0].size #len(table_access[0])
+
+
 def pos_callback(pos):
 	#pour chaque point
 	for k in range(len(pos)):
@@ -70,22 +82,41 @@ def pos_callback(pos):
 		(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
 		print(trans)
 		print(rot)
+		ratio_x=lenx/(corner_top_right_x-origin_x)
+		ratio_y=leny/(corner_bottom_left_y-origin_y)
 		#on la convertie en angle d'euler
 		newrot=euler_from_quaternion(rot[0],rot[1],rot[2],rot[3])
+		position=[trans[0],trans[1]]
+		position=[position[0]*ratio_x,leny-(position[1]*ratio_y)]
 		#si la vitesse est trop faible, on passe au point suivant
 		if (verif==0):
 			k=k-1
 		#sinon on garde le point précédent
 		u=loi_commande([trans[0],trans[1]],pos[k], newrot[2])
 		pub.publish(u)
-		
+
+def corners_callback(msg):
+	global origin_x
+	global origin_y
+	global corner_top_right_x
+	global corner_top_right_y
+	global corner_bottom_left_x
+	global corner_bottom_left_y
+	origin_x = msg.data[0]  # Origine de la carte (Position en coordonnées de la carte)
+	origin_y = msg.data[1]  # Origine de la carte (Position en coordonnées de la carte)
+	corner_top_right_x=msg.data[2]
+	corner_top_right_y=msg.data[3]
+	corner_bottom_left_x=msg.data[4]
+	corner_bottom_left_y=msg.data[5]
+	
 
 def main():
 	# Crée un node qui va récupérer les positions et la map donné par le robot.
 	listener = tf.TransformListener()
 	
 	sub = rospy.Subscriber('/path_follow',Int32MultiArray , pos_callback, queue_size=10)
-	
+	sub3 = rospy.Subscriber('/map_corners', Float64MultiArray , corners_callback)
+	sub1 = rospy.Subscriber('/binary_map_topic', Int32MultiArray , len_callback, queue_size=10)
 	# spin le node afin de recevoir les messages, et de publier la liste de point de passage.
 	rospy.spin()
 
