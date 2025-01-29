@@ -36,7 +36,7 @@ def loi_commande(pos_rob,pos_obj, theta):
 	u=np.dot(invtab,v)
 	u[1]=-u[1]
 	#si la vitesse devient trop faible, on passe au point suivant
-	if (u[0]>1):
+	if (u[0]>1 or u[0]<1):
 		verif=0;
 	else:
 		verif=1;
