@@ -18,6 +18,7 @@ corner_top_right_y =1.0
 corner_bottom_left_x =1.0
 corner_bottom_left_y =1.0
 leny=1.0
+lenx=1.0
 verif=1
 
 listener = tf.TransformListener()
@@ -76,6 +77,8 @@ pub = rospy.Publisher('/cmd_vel', Twist , queue_size=10)
 
 def len_callback(table_access):
 	global leny
+	global lenx
+	lenx=table_access.layout.dim[1].size #len(table_access[0])
 	leny=table_access.layout.dim[0].size #len(table_access[0])
 
 
@@ -86,6 +89,8 @@ def pos_callback(pos):
 	global corner_top_right_y
 	global corner_bottom_left_x
 	global corner_bottom_left_y
+	global lenx
+	global leny
 	#pour chaque point
 	print(len(pos.data)/2)
 	length=int(len(pos.data)/2)
