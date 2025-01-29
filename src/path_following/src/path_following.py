@@ -24,7 +24,7 @@ verif=1
 listener = tf.TransformListener()
 #commande de ralliement de point
 def loi_commande(pos_rob,pos_obj, theta):
-	k1=2
+	k1=1
 	k2=1
 	l1=30 #point théorique placé 30 cm devant le robot
 	#on applique un ralliement de point de passage
@@ -120,7 +120,13 @@ def pos_callback(pos):
 		cmd_vel.angular.z=u[1]
 		
 		pub.publish(cmd_vel)
-
+	cmd_vel.linear.x=0
+	cmd_vel.linear.y=0
+	cmd_vel.linear.z=0
+	cmd_vel.angular.x=0
+	cmd_vel.angular.y=0
+	cmd_vel.angular.z=0
+	pub.publish(cmd_vel)
 def corners_callback(msg):
 
 	global origin_x
