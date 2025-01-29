@@ -263,7 +263,7 @@ def dijk_callback(table_access):
 		#on trouve le chemin le plus court vers l'arrivé
 		point_de_passage=path_find(table,position_initial,table_access)
 		#on allège la liste des points inutiles
-		print(point_de_passage)
+		#print(point_de_passage)
 		point_de_passage_leger=point_list_cleaner(point_de_passage)
 		#on publie la liste de point
 		for k in range (len(point_de_passage_leger)):
