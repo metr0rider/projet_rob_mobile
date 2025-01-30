@@ -6,11 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/home/projet_rob_mobile/src/pck_launch_all/src/rand_exp.cpp
+/home/catkin_ws/src/pck_launch_all/src/rand_exp.cpp
 ros/ros.h
-/home/projet_rob_mobile/src/pck_launch_all/src/ros/ros.h
+/home/catkin_ws/src/pck_launch_all/src/ros/ros.h
 geometry_msgs/Twist.h
-/home/projet_rob_mobile/src/pck_launch_all/src/geometry_msgs/Twist.h
+/home/catkin_ws/src/pck_launch_all/src/geometry_msgs/Twist.h
 cstdlib
 -
 ctime

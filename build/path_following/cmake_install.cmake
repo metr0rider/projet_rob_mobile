@@ -1,8 +1,8 @@
-# Install script for directory: /home/projet_rob_mobile/src/path_following
+# Install script for directory: /home/catkin_ws/src/path_following
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/projet_rob_mobile/install")
+  set(CMAKE_INSTALL_PREFIX "/home/catkin_ws/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,17 +38,17 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/projet_rob_mobile/build/path_following/catkin_generated/installspace/path_following.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/catkin_ws/build/path_following/catkin_generated/installspace/path_following.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/path_following/cmake" TYPE FILE FILES
-    "/home/projet_rob_mobile/build/path_following/catkin_generated/installspace/path_followingConfig.cmake"
-    "/home/projet_rob_mobile/build/path_following/catkin_generated/installspace/path_followingConfig-version.cmake"
+    "/home/catkin_ws/build/path_following/catkin_generated/installspace/path_followingConfig.cmake"
+    "/home/catkin_ws/build/path_following/catkin_generated/installspace/path_followingConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/path_following" TYPE FILE FILES "/home/projet_rob_mobile/src/path_following/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/path_following" TYPE FILE FILES "/home/catkin_ws/src/path_following/package.xml")
 endif()
 

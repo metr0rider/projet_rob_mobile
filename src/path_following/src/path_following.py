@@ -25,22 +25,29 @@ listener = tf.TransformListener()
 #commande de ralliement de point
 def loi_commande(pos_rob,pos_obj, theta):
 	global verif
-	k1=1
-	k2=1
-	l1=30 #point théorique placé 30 cm devant le robot
+	k1=0.7
+	k2=0.7
+	l1=10 #point théorique placé 30 cm devant le robot
 	#on applique un ralliement de point de passage
+	#print(pos_rob)
+	#print(pos_obj)
 	v1=k1*(pos_rob[0]-pos_obj[0])
 	v2=k2*(pos_rob[1]-pos_obj[1])
 	v=np.array(([v1],[v2]))
 	tab=np.array(([np.cos(theta),-l1*np.sin(theta)],[np.sin(theta),l1*np.cos(theta)]))
 	invtab=np.linalg.inv(tab)
 	u=np.dot(invtab,v)
-	u[1]=-u[1]
+	u[0]=-1*u[0]
+	u[1]=-1*u[1]
+	if (u[0]>1 or u[0]<-1):
+		u[0]=np.sign(u[0])*1
+	if (u[1]>2 or u[1]<-2):
+		u[1]=np.sign(u[1])*2
 	#si la vitesse devient trop faible, on passe au point suivant
-	if (u[0]>1 or u[0]<1):
-		verif=0;
+	if ((((pos_rob[0]-pos_obj[0])**2)+((pos_rob[1]-pos_obj[1])**2))>400):
+		verif=0
 	else:
-		verif=1;
+		verif=1
 	return (u)
 
 	
@@ -84,6 +91,8 @@ def len_callback(table_access):
 
 
 def pos_callback(pos):
+	k=0
+	i=0
 	cmd_vel= Twist()
 	global origin_x
 	global origin_y
@@ -98,7 +107,7 @@ def pos_callback(pos):
 	print(len(pos.data)/2)
 	length=int(len(pos.data)/2)
 	print(length)
-	for k in range(length):
+	while (k<(length-1)):
 		#on récupère la position du robot
 		(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
 		#print(trans)
@@ -110,10 +119,11 @@ def pos_callback(pos):
 		position=[trans[0],trans[1]]
 		position=[(position[0]-origin_x)*ratio_x,leny-((position[1]-origin_y)*ratio_y)]
 		#si la vitesse est trop faible, on passe au point suivant
-		if (verif==0):
-			k=k-1
+		if (verif==1):
+			k=i+1
+			i=k
 		#sinon on garde le point précédent
-		u=loi_commande([trans[0],trans[1]],[pos.data[2*k],pos.data[2*k+1]], newrot[2])
+		u=loi_commande(position,[pos.data[2*k],pos.data[2*k+1]], newrot[2])
 		print(u)
 		cmd_vel.linear.x=u[0]
 		cmd_vel.linear.y=0

@@ -4,5 +4,5 @@ PROJECT_PKG_CONFIG_INCLUDE_DIRS = "".split(';') if "" != "" else []
 PROJECT_CATKIN_DEPENDS = "".replace(';', ' ')
 PKG_CONFIG_LIBRARIES_WITH_PREFIX = "".split(';') if "" != "" else []
 PROJECT_NAME = "pck_launch_all"
-PROJECT_SPACE_DIR = "/home/projet_rob_mobile/install"
+PROJECT_SPACE_DIR = "/home/catkin_ws/install"
 PROJECT_VERSION = "0.0.0"

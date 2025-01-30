@@ -1,4 +1,4 @@
-prefix=/home/projet_rob_mobile/devel
+prefix=/home/catkin_ws/devel
 
 Name: pck_launch_all
 Description: Description of pck_launch_all
