@@ -2,11 +2,9 @@
 import rospy
 import numpy as np
 import tf
-from geometry_msgs.msg import PoseStamped, Twist
+from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import OccupancyGrid
-from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-import actionlib
 import random
 
 class RRTExploration:
@@ -14,8 +12,6 @@ class RRTExploration:
         rospy.init_node('rrt_explorer', anonymous=True)
 
         # Paramètres de RRT
-        # self.max_iterations = 1000
-
         self.step_size = 0.5  # Distance entre les nœuds
         self.unknown_threshold = -1  # Valeur des zones inconnues dans la carte
         self.map_data = None
@@ -27,11 +23,10 @@ class RRTExploration:
         self.map_sub = rospy.Subscriber('/map', OccupancyGrid, self.map_callback)
         self.scan_sub = rospy.Subscriber('/scan', LaserScan, self.scan_callback)
 
-        # Client pour move_base
-        self.move_base_client = actionlib.SimpleActionClient('/move_base', MoveBaseAction)
-        self.move_base_client.wait_for_server()
+        # Publisher pour le contrôle du robot
+        self.cmd_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 
-        rospy.loginfo("Exploration autonome avec RRT démarrée !")
+        rospy.loginfo("Exploration autonome avec RRT (via /cmd_vel) démarrée !")
 
     def map_callback(self, map_msg):
         """ Récupère la carte et prépare les données pour RRT. """
@@ -53,12 +48,14 @@ class RRTExploration:
     def avoid_obstacle(self):
         """ Manœuvre d'évitement d'obstacles. """
         twist = Twist()
-        twist.linear.x = -0.2
-        twist.angular.z = random.choice([-1.0, 1.0])
+        twist.linear.x = -0.2  # Reculer légèrement
+        twist.angular.z = random.choice([-1.0, 1.0])  # Tourner aléatoirement
+        self.cmd_pub.publish(twist)
         rospy.sleep(1)
 
         twist.linear.x = 0
         twist.angular.z = 0
+        self.cmd_pub.publish(twist)
         rospy.sleep(1)
 
     def sample_free_space(self):
@@ -76,8 +73,8 @@ class RRTExploration:
     def generate_rrt_path(self, start_x, start_y, goal_x, goal_y):
         """ Génère un chemin avec RRT entre un point de départ et un objectif. """
         tree = [(start_x, start_y)]
-        while(rospy.get_param('/explo_auto', False)):
-            rospy.loginfo("Generation of path !")
+        while rospy.get_param('/explo_auto', False):
+            rospy.loginfo("Génération du chemin RRT...")
             x_rand, y_rand = self.sample_free_space()
             nearest_node = min(tree, key=lambda node: np.linalg.norm(np.array(node) - np.array([x_rand, y_rand])))
 
@@ -93,18 +90,24 @@ class RRTExploration:
                 return tree
         return []
 
-    def navigate_to_goal(self, x, y):
-        """ Envoie le robot à une position avec move_base. """
-        rospy.loginfo(f"Navigation vers ({x:.2f}, {y:.2f})")
-        goal = MoveBaseGoal()
-        goal.target_pose.header.frame_id = "map"
-        goal.target_pose.header.stamp = rospy.Time.now()
-        goal.target_pose.pose.position.x = x
-        goal.target_pose.pose.position.y = y
-        goal.target_pose.pose.orientation.w = 1.0
-        rospy.loginfo("Navigation !")
-        self.move_base_client.send_goal(goal)
-        self.move_base_client.wait_for_result()
+    def move_along_path(self, path):
+        """ Fait suivre au robot le chemin généré par RRT en publiant sur /cmd_vel. """
+        for i in range(len(path) - 1):
+            current = np.array(path[i])
+            next_point = np.array(path[i + 1])
+
+            direction = next_point - current
+            angle = np.arctan2(direction[1], direction[0])
+
+            twist = Twist()
+            twist.linear.x = 0.3  # Vitesse en ligne droite
+            twist.angular.z = angle * 0.5  # Correction d'orientation
+            self.cmd_pub.publish(twist)
+
+            rospy.sleep(1)
+
+        # Arrêt du robot
+        self.cmd_pub.publish(Twist())
 
     def run(self):
         """ Boucle principale d'exploration. """
@@ -121,8 +124,8 @@ class RRTExploration:
             path = self.generate_rrt_path(start_x, start_y, goal_x, goal_y)
 
             if path:
-                for node in path:
-                    self.navigate_to_goal(node[0], node[1])
+                rospy.loginfo("Suivi du chemin généré...")
+                self.move_along_path(path)
 
             rate.sleep()
 
@@ -132,4 +135,3 @@ if __name__ == "__main__":
         explorer.run()
     except rospy.ROSInterruptException:
         rospy.loginfo("Exploration interrompue.")
-
