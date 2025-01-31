@@ -14,6 +14,8 @@ from geometry_msgs.msg import PoseStamped, PointStamped
 from std_msgs.msg import Int32MultiArray, MultiArrayDimension, Float32MultiArray, Float64MultiArray
 from visualization_msgs.msg import Marker, MarkerArray
 
+rospy.set_param("/dilatation_map", 15)
+
 class ImageConverter:
     def __init__(self):
         # Initialisation de ROS
@@ -523,7 +525,7 @@ class ImageConverter:
         denoised_image = cv2.medianBlur(image, 3)
         _, binary_image = cv2.threshold(denoised_image, 50, 255, cv2.THRESH_BINARY_INV)
 
-        dilation_size = 15
+        dilation_size = rospy.get_param("/dilatation_map", 15)
         kernel = cv2.getStructuringElement(
             cv2.MORPH_RECT,
             (2 * dilation_size + 1, 2 * dilation_size + 1),
