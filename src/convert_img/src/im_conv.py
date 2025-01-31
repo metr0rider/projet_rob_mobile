@@ -230,6 +230,7 @@ class ImageConverter:
     def run(self):
         rospy.loginfo("Press 's' to fetch and process the map, or 'q' to quit.")
         while not rospy.is_shutdown():
+            # Sauvegarde de la map en appuyant sur les touches du clavier
             # key = self.get_key()
             # if key == 's':
             #     rospy.loginfo("Fetching and processing map...")
