@@ -1,0 +1,8 @@
+prefix=/home/projet_rob_mobile/devel
+
+Name: pck_launch_all
+Description: Description of pck_launch_all
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
