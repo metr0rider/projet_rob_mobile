@@ -18,7 +18,7 @@ def joy_callback(msg):
     #print(msg.axes)
     twist_msg.linear.x = 4.0 * msg.axes[7]  # Map the y-axis of the joystick to the linear velocity.
     twist_msg.angular.z = 1 * msg.axes[3]  # Map the x-axis of the joystick to the angular velocity.
-    if (msg.button[0]==1):
+    if (msg.buttons[0]==1):
     	rospy.set_param("/retour_base", True)
     	
     #print(msg.buttons)
