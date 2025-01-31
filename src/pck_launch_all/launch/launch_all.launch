@@ -5,6 +5,10 @@
 	<node pkg="gmapping" type="slam_gmapping" name="mapping"/>
 	<arg name = "rviz_config_file" default = "$(find pck_launch_all)/robot_model.rviz"/>
 	<!--node pkg = "path_finding" type = "path_planner" name = "path_finding"></node-->
+	<node pkg="joy" type="joy_node" name="joy_node"/>
+	<node pkg="joycommand" type="joycommand.py" name="joycommand"/>
+	<node pkg="path_find" type="path_dijkstra.py" name="path_find"/>
+	<node pkg="path_following" type="path_following.py" name="path_follow"/>
 	<node pkg="rviz" type="rviz" name="rviz" output="screen" args="-d $(arg rviz_config_file)"/>
 	 
 	 <!--node pkg="pck_launch_all" type="delayed_map_saver.py" name="delayed_map_saver" output="screen"/-->

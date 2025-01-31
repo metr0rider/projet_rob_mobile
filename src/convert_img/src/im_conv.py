@@ -42,6 +42,10 @@ class ImageConverter:
 
         rospy.loginfo("Waiting for user input to fetch map...")
 
+        listener = tf.TransformListener()
+        listener.waitForTransform('/map', '/base_link', rospy.Time(0), rospy.Duration(1.0))
+        (self.trans, self.rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
+
         # Vérifier si le répertoire de sortie existe
         if not os.path.exists(self.output_dir):
             rospy.loginfo(f"Output directory {self.output_dir} does not exist. Creating it.")
@@ -102,16 +106,14 @@ class ImageConverter:
         
     def publish_robot_position(self):
         try:
-            listener = tf.TransformListener()
-            listener.waitForTransform('/map', '/base_link', rospy.Time(0), rospy.Duration(1.0))
-            (trans, rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
+            
             robot_position = Float32MultiArray()
-            robot_position.data = list(trans)  # Ajouter les coordonnées x, y, z
+            robot_position.data = list(self.trans)  # Ajouter les coordonnées x, y, z
             self.pos_robot.publish(robot_position)
-            rospy.loginfo(f"Published robot position: {trans}")
+            rospy.loginfo(f"Published robot position: {self.trans}")
 
             # Publier la position du robot sur /clicked_point
-            self.publish_clicked_point(trans[0], trans[1], trans[2])
+            self.publish_clicked_point(self.trans[0], self.trans[1], self.trans[2])
 
         except tf.Exception as e:
             rospy.logwarn(f"Could not fetch robot position: {e}")
@@ -228,7 +230,7 @@ class ImageConverter:
     def run(self):
         rospy.loginfo("Press 's' to fetch and process the map, or 'q' to quit.")
         while not rospy.is_shutdown():
-            key = self.get_key()
+            # key = self.get_key()
             # if key == 's':
             #     rospy.loginfo("Fetching and processing map...")
             #     map_image = self.get_map()
@@ -248,21 +250,21 @@ class ImageConverter:
                     # Une fois la carte traitée, remettre `map_publi` à False
                     rospy.set_param('/map_publi', False)
                     rospy.loginfo("Map published, resetting '/map_publi' to False.")
-                break  # Sortir de la boucle après avoir traité la carte
+                continue  # Sortir de la boucle après avoir traité la carte
 
-            rate.sleep()  # Attendre avant de vérifier à nouveau
+            #rate.sleep()  # Attendre avant de vérifier à nouveau
 
             retour_base = rospy.get_param('/retour_base', False)  # Lire le paramètre avec une valeur par défaut False
             
-            elif retour_base:
+            if retour_base:
                 rospy.loginfo("/retour_base is True, fetching and processing map...")
                 rospy.loginfo("Recording robot trajectory...")
                 self.publish_robot_position()
 
-                    # Une fois la carte traitée, remettre `map_publi` à False
-                    rospy.set_param('/retour_base', False)
-                    rospy.loginfo("Robot position published, resetting '/retour_base' to False.")
-                break  # Sortir de la boucle après avoir traité la carte
+                # Une fois la carte traitée, remettre `map_publi` à False
+                rospy.set_param('/retour_base', False)
+                rospy.loginfo("Robot position published, resetting '/retour_base' to False.")
+                continue  # Sortir de la boucle après avoir traité la carte
 
             rate.sleep()  # Attendre avant de vérifier à nouveau
             
@@ -270,9 +272,9 @@ class ImageConverter:
             #     rospy.loginfo("Recording robot trajectory...")
             #     self.publish_robot_position()
                     
-            elif key == 'q':
-                rospy.loginfo("Exiting...")
-                break
+            # elif key == 'q':
+            #     rospy.loginfo("Exiting...")
+            #     break
 
     def extract_map_data(self, no_grid_image):
         """
