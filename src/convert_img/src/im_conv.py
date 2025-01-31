@@ -24,6 +24,7 @@ class ImageConverter:
         
         # Publisher pour la position du robot
         self.pos_robot = rospy.Publisher('pos_robot', Float32MultiArray, queue_size=10)
+        self.clicked_point_pub = rospy.Publisher('/clicked_point', PointStamped, queue_size=10)
 
         # Publisher pour le chemin
         self.path_publisher = rospy.Publisher('path', Path, queue_size=10)
@@ -47,34 +48,6 @@ class ImageConverter:
             os.makedirs(self.output_dir)
 
         self.run()
-
-    # def publish_corners(self, cropped_image, resolution, origin):
-    #     """
-    #     Publie les coordonnées des coins de la carte rognée (en haut à gauche, en haut à droite, en bas à gauche).
-        
-    #     Args:
-    #         cropped_image (numpy.ndarray): Carte rognée.
-    #         resolution (float): Résolution de la carte (mètres par pixel).
-    #         origin (tuple): Origine de la carte (en mètres).
-    #     """
-    #     height, width = cropped_image.shape
-
-    #     # Calculer les coordonnées des coins en mètres
-    #     top_left = (origin[0], origin[1])
-    #     top_right = (origin[0] + width * resolution, origin[1])
-    #     bottom_left = (origin[0], origin[1] + height * resolution)
-
-    #     # Préparer le message
-    #     corners_msg = Float64MultiArray()
-    #     corners_msg.data = [
-    #         top_left[0], top_left[1],
-    #         top_right[0], top_right[1],
-    #         bottom_left[0], bottom_left[1]
-    #     ]
-
-    #     # Publier le message
-    #     self.corners_publisher.publish(corners_msg)
-    #     rospy.loginfo(f"Published corners: Top Left {top_left}, Top Right {top_right}, Bottom Left {bottom_left}")
 
     def get_key(self):
         """Capture une touche entrée dans le terminal."""
@@ -136,8 +109,23 @@ class ImageConverter:
             robot_position.data = list(trans)  # Ajouter les coordonnées x, y, z
             self.pos_robot.publish(robot_position)
             rospy.loginfo(f"Published robot position: {trans}")
+
+            # Publier la position du robot sur /clicked_point
+            self.publish_clicked_point(trans[0], trans[1], trans[2])
+
         except tf.Exception as e:
             rospy.logwarn(f"Could not fetch robot position: {e}")
+
+    def publish_clicked_point(self, x, y, z=0.0):
+        point_msg = PointStamped()
+        point_msg.header.stamp = rospy.Time.now()
+        point_msg.header.frame_id = "map"  # Adapter si nécessaire
+        point_msg.point.x = x
+        point_msg.point.y = y
+        point_msg.point.z = z
+
+        rospy.loginfo(f"Publishing clicked point: ({x}, {y}, {z})")
+        self.clicked_point_pub.publish(point_msg)
     
     def publish_path(self):
         """
@@ -241,15 +229,46 @@ class ImageConverter:
         rospy.loginfo("Press 's' to fetch and process the map, or 'q' to quit.")
         while not rospy.is_shutdown():
             key = self.get_key()
-            if key == 's':
-                rospy.loginfo("Fetching and processing map...")
+            # if key == 's':
+            #     rospy.loginfo("Fetching and processing map...")
+            #     map_image = self.get_map()
+            #     if map_image is not None:
+            #         self.process_map(map_image)
+
+            rate = rospy.Rate(1)  # Vérifier la valeur du paramètre 1 fois par seconde
+
+            map_publi = rospy.get_param('/map_publi', False)  # Lire le paramètre avec une valeur par défaut False
+            
+            if map_publi:
+                rospy.loginfo("map_publi is True, fetching and processing map...")
                 map_image = self.get_map()
                 if map_image is not None:
                     self.process_map(map_image)
+
+                    # Une fois la carte traitée, remettre `map_publi` à False
+                    rospy.set_param('/map_publi', False)
+                    rospy.loginfo("Map published, resetting '/map_publi' to False.")
+                break  # Sortir de la boucle après avoir traité la carte
+
+            rate.sleep()  # Attendre avant de vérifier à nouveau
+
+            retour_base = rospy.get_param('/retour_base', False)  # Lire le paramètre avec une valeur par défaut False
             
-            elif key == 't':
+            elif retour_base:
+                rospy.loginfo("/retour_base is True, fetching and processing map...")
                 rospy.loginfo("Recording robot trajectory...")
                 self.publish_robot_position()
+
+                    # Une fois la carte traitée, remettre `map_publi` à False
+                    rospy.set_param('/retour_base', False)
+                    rospy.loginfo("Robot position published, resetting '/retour_base' to False.")
+                break  # Sortir de la boucle après avoir traité la carte
+
+            rate.sleep()  # Attendre avant de vérifier à nouveau
+            
+            # elif key == 't':
+            #     rospy.loginfo("Recording robot trajectory...")
+            #     self.publish_robot_position()
                     
             elif key == 'q':
                 rospy.loginfo("Exiting...")
@@ -460,29 +479,12 @@ class ImageConverter:
             rospy.loginfo(f"Obstacle map saved to {binary_output_file}")
 
             # **Tracer un chemin interactif sur l'image rognée sans grille**
-            rospy.loginfo("Launching interactive path tracing...")
-            self.trace_and_save_path(no_grid_image)
+            # rospy.loginfo("Launching interactive path tracing...")
+            # self.trace_and_save_path(no_grid_image)
 
         except Exception as e:
             rospy.logerr(f"Failed to process map: {e}")
 
-
-    # def crop_to_black_area(self, image):
-    #     """
-    #     Identifie et rogner la zone contenant le maximum de pixels noirs dans l'image.
-    #     """
-    #     black_pixels = np.where(image == 0)
-
-    #     if black_pixels[0].size == 0 or black_pixels[1].size == 0:
-    #         rospy.logwarn("No black pixels detected in the image.")
-    #         return image
-
-    #     min_row, max_row = np.min(black_pixels[0]), np.max(black_pixels[0])
-    #     min_col, max_col = np.min(black_pixels[1]), np.max(black_pixels[1])
-
-    #     rospy.loginfo(f"Cropping to rectangle: ({min_row}, {min_col}) - ({max_row}, {max_col})")
-    #     cropped_image = image[min_row:max_row + 1, min_col:max_col + 1]
-    #     return cropped_image
 
     def crop_to_black_area(self, image):
         """
