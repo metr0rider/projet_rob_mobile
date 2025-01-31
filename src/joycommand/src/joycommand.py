@@ -9,15 +9,19 @@ from sensor_msgs.msg import Joy
 
 twist_msg = Twist()
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+rospy.set_param("/retour_base", False)
 
 def joy_callback(msg):
     # This function will be called every time a message is received on the /joy topic.
     # In this example, we're publishing the received message to the /skidbot/cmd_vel topic.
     # Create a Twist message from the Joy message.
-    print(msg.axes)
-    twist_msg.linear.x = 4.0 * msg.axes[4]  # Map the y-axis of the joystick to the linear velocity.
+    #print(msg.axes)
+    twist_msg.linear.x = 4.0 * msg.axes[7]  # Map the y-axis of the joystick to the linear velocity.
     twist_msg.angular.z = 1 * msg.axes[3]  # Map the x-axis of the joystick to the angular velocity.
-    print(msg.buttons)
+    if (msg.button[0]==1):
+    	rospy.set_param("/retour_base", True)
+    	
+    #print(msg.buttons)
     # Publish the Twist message to the /skidbot/cmd_vel topic.
     pub.publish(twist_msg)
 
