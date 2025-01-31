@@ -14,6 +14,10 @@ from nav_msgs.msg import OccupancyGrid
 
 
 rospy.init_node('dijkstra')
+
+rospy.set_param("/map_publi", False)
+
+
 resolution =1
 # Initialisation de la position (x, y, z) de l'origine
 origin_x = 0.0  # Par exemple, à l'origine du système de coordonnées
@@ -88,7 +92,7 @@ def dijkstra_algorithm(table_access, pos):
 	#on sauvegarde la position initial du robot
 	posx=int(pos[0])
 	posy=int(pos[1])
-	print(posx,posy)
+	#print(posx,posy)
 	current_pos=[[posx,posy]]
 	#on met le point d'origine du robot à 0
 	table[posx][posy]=0
@@ -143,12 +147,12 @@ def dijkstra_algorithm(table_access, pos):
 	
 def path_find(table,pos,table_access):
 	stride_x= table_access.layout.dim[1].stride
-	print(stride_x)
+	#print(stride_x)
 	global lenx
 	global leny
 	posx=int(pos[0])
 	posy=int(pos[1])
-	print(posx,posy)
+	#print(posx,posy)
 	begin_pos=[[posx,posy]]
 	path=[[posx,posy]]
 	D=table[posx][posy]
@@ -245,7 +249,7 @@ def dijk_callback(table_access):
 	#on détermine les dimensions de la map à traiter
 	lenx=table_access.layout.dim[1].size  #len(table_access)
 	leny=table_access.layout.dim[0].size #len(table_access[0])
-	print(lenx,leny)
+	#print(lenx,leny)
 	tab=[]
 	if (time_to_publish==True):
 		ratio_x=lenx/(corner_top_right_x-origin_x)
@@ -269,7 +273,7 @@ def dijk_callback(table_access):
 		for k in range (len(point_de_passage_leger)):
 			for i in range (len(point_de_passage_leger[0])):
 				tab.append(point_de_passage_leger[k][i])
-		print(tab)
+		#print(tab)
 		point_list.data=tab
 		pub.publish(point_list)
 		#on re désactive la publication
@@ -299,16 +303,16 @@ def pos_callback(pos):
 	#on sauvegarde cette position
 	position_finale=[point.point.x,point.point.y]
 	#on prend la position actuel du robot
-	print(position_finale)
+	#print(position_finale)
 	(trans,rot) = listener.lookupTransform('/map', '/base_link', rospy.Time(0))
 	#print(trans)
 	#print(rot)
 	#on sauvegarde cette position
 	position_initial=[trans[0],trans[1]]
-	print(position_initial)
+	#print(position_initial)
 	#on active le path finding
 	time_to_publish=True
-	
+	rospy.set_param("/map_publi", True)
 
 def main():
 	# Crée un node qui va récupérer les positions et la map donné par le robot.
