@@ -11,6 +11,10 @@ from geometry_msgs.msg  import Twist
 from std_msgs.msg import Float64MultiArray
 
 rospy.init_node('path_follow')
+
+rospy.set_param("/speed_straight", 1)
+rospy.set_param("/speed_curve", 2)
+
 origin_x = 1.0
 origin_y =1.0
 corner_top_right_x =1.0
@@ -25,6 +29,8 @@ listener = tf.TransformListener()
 #commande de ralliement de point
 def loi_commande(pos_rob,pos_obj, theta):
 	global verif
+	speed_straight=rospy.get_param("/speed_straight", 1)
+	speed_curve=rospy.get_param("/speed_curve", 2)
 	k1=0.7
 	k2=0.7
 	l1=10 #point théorique placé 30 cm devant le robot
@@ -39,10 +45,10 @@ def loi_commande(pos_rob,pos_obj, theta):
 	u=np.dot(invtab,v)
 	u[0]=-1*u[0]
 	u[1]=-1*u[1]
-	if (u[0]>1 or u[0]<-1):
-		u[0]=np.sign(u[0])*1
-	if (u[1]>2 or u[1]<-2):
-		u[1]=np.sign(u[1])*2
+	if (u[0]>speed_straight or u[0]<-speed_straight):
+		u[0]=np.sign(u[0])*speed_straight
+	if (u[1]>speed_curve or u[1]<-speed_curve):
+		u[1]=np.sign(u[1])*speed_curve
 	#si la vitesse devient trop faible, on passe au point suivant
 	if ((((pos_rob[0]-pos_obj[0])**2)+((pos_rob[1]-pos_obj[1])**2))>400):
 		verif=0
