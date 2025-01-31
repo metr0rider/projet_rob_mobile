@@ -1,8 +1,0 @@
-prefix=/home/projet_rob_mobile/install
-
-Name: joycommand
-Description: Description of joycommand
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

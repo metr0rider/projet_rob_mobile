@@ -1,8 +1,0 @@
-prefix=/home/projet_rob_mobile/install
-
-Name: path_find
-Description: Description of path_find
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
